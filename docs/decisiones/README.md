@@ -141,3 +141,13 @@ Ubicación histórica bajo app sustituida por DEC-2026-11-04-06. Se conservan la
 - Límites: RF-009 no cierra RNF-001 (máximo de dos segundos), identificación individual RF-011, MySQL productivo, infraestructura externa ni revisión visual general UI-001. La prueba de navegador de RF-009 es funcional/visual y no se presenta como ensayo de rendimiento de RNF-001.
 
 Para decisiones posteriores usar [la plantilla](../plantillas/decision.md), conservar historial, fuente, alternativas y alcance. Las exclusiones explícitas se identifican con `DEC-AAAA-MM-DD-NN` en Fuente de las tareas afectadas.
+
+## DEC-2026-11-17-14 — Proyección de necesidades por variante
+
+- Fuente y autorización: el usuario indicó «PRIMERO EL R010» el 2026-11-17. Se implementa únicamente RF-010 y su integración necesaria.
+- Fuentes verificadas: inventory_batches.quantity es depósito físico; production_batches.in_process son pares pendientes de alta; ventas publica la suma quantity − dispatched de notas Confirmado/Parcial. Borrador, Entregado y Anulado no generan demanda. La tanda ya constituye la fuente operativa del corte autorizado; no se crea un sistema de planta.
+- Cálculo: disponible + en proceso − pendientes; necesidad de fabricación/inyección = max(0, −saldo). El resultado conserva el signo y no cambia stock, pedidos, auditoría o deuda monetaria ni crea una orden de producción.
+- Lectura: todas las variantes con páginas de 25, incluidas las que carecen de movimientos; cada suma cubre todos los lotes y pedidos del artículo, sin límites de 200/500. Ausencia de filas equivale a cero; una fuente fallida propaga error y nunca se convierte en cero. Un fallo del refresco conserva los últimos datos con el aviso existente.
+- Seguridad y composición: production.manage o inventory.view en Application; las rutas de Producción y su fragmento solo presentan la proyección a esos permisos. ArticleDemand publica cantidades sin clientes, crédito ni destinos. Infraestructura consulta tablas del contexto propietario. La transacción de lectura usa la conexión compartida y no modifica el contador de auditoría.
+- Interfaz: sección Necesidades de producción en el panel Filament existente, con ambos paginadores conservados durante navegación/refresco. Sin dependencias ni migraciones nuevas.
+- Límites: motor/red productivos, ergonomía industrial y revisión visual global permanecen en sus tareas; los errores detectados en los selectores operativos no se incluyen en esta entrega.

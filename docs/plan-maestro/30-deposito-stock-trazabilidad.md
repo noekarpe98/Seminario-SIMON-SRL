@@ -43,22 +43,28 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
   - node tests/Browser/pending-orders.mjs --traceability verificó en Edge aislado lote exacto, cliente/pedido/artículo, ausencia de crédito, fechas inclusivas, consulta sin resultados y móvil sin desbordamiento del documento. Usó SQLite/perfil temporales y dos salidas de prueba sobre mil pedidos sintéticos. Capturas finales de escritorio/móvil en storage/app/private/rf009-trazabilidad-desktop.png y rf009-trazabilidad-mobile.png, revisadas visualmente; reporte en storage/logs/rf009-browser.json. Se cerraron y eliminaron los recursos temporales. No es un ensayo del límite de RNF-001 ni una revisión de todas las pantallas de UI-001.
   - Alcance normativo revisado con las fuentes oficiales enlazadas en DEC-2026-11-05-13: certificación de EPP exige evaluación del producto/fábrica y el plan IRAM 2026 incluye trabajo sobre 3610. No se conoce la edición/certificado específico de SIMON ni se dispuso del texto normativo completo; no se declara certificación, conformidad integral ni identificación individual. La funcionalidad implementa el lote/fabricación acordados en las aclaraciones. INV-001 está HECHO y permanece cubierto por la regresión; RF-008 se cerró antes de comenzar esta tarea.
 
-### [PENDIENTE] RF-010 — Calcular Stock Disponible + Producción en Proceso − Pedidos Pendientes
+### [HECHO] RF-010 — Calcular Stock Disponible + Producción en Proceso − Pedidos Pendientes
 
 - **Capa:** SOLICITADO
-- **Fuente:** SRS-2026-11-04, RF10; aclaraciones posteriores SRS-ACL-2026-11-04; DEC-2026-11-04-05
+- **Fuente:** SRS-2026-11-04, RF10; aclaraciones posteriores SRS-ACL-2026-11-04; DEC-2026-11-04-05; autorización del usuario 2026-11-17 «PRIMERO EL R010»
 - **Contexto propietario:** InventarioTrazabilidad (frontera propuesta)
 - **Dependencias:** RF-008, RF-012
 - **Alcance:** Disponible físico en depósito + pares aún en proceso − PP; el alta de terminados retira esos pares de proceso e ingresa a depósito en una transacción.
 - **Fuera de alcance:** Implementar un sistema de planta completo o descontar PP del stock físico al calcular la proyección.
 - **Invariantes:** Conservar signos, unidad y corte temporal de la fórmula; su resultado es una proyección y no un alta/baja física. No asumir que disponible significa stock bruto o neto de reservas.
-- **Contratos y archivos previstos:** Propuesta: consulta de existencias de InventarioTrazabilidad, contrato de PP de VentasPedidos y puerto de producción en proceso cuyo origen está pendiente.
+- **Contratos y archivos previstos:** QueryProductionNeeds/NeedsInventory y SqlNeedsInventory en InventarioTrazabilidad; ArticleDemand publicado por VentasPedidos e implementado por SqlPendingOrders. Composición en AppServiceProvider y sección needs de la vista Producción.
 - **Criterios de aceptación:** Con datos de prueba Disponible=10, EnProceso=4 y PP=20 se obtiene -6; cada cambio de una entrada actualiza el resultado sin duplicar efectos. Se distingue una fuente no disponible de un valor cero y se documenta cómo se traduce el resultado en necesidad de inyección.
-- **Responsable:** sin asignar
-- **Fecha de inicio:** pendiente
-- **Última actualización:** 2026-11-04
-- **Próximo paso:** componer la consulta y vista de necesidades con esas fuentes ya definidas, sin confundir proyección ni cuenta corriente con movimientos físicos
-- **Evidencia actual:** Requisito RF10 incorporado desde la fuente conservada; sin implementación ni pruebas funcionales específicas observadas. Dependencias, contratos y casos de prueba son descomposición técnica del plan, no decisiones comerciales adicionales.
+- **Responsable:** Codex
+- **Fecha de inicio:** 2026-11-17
+- **Última actualización:** 2026-11-17
+- **Próximo paso:** ninguno de implementación en RF-010; cerrada el 2026-11-17. Validar operación sobre motor/red productivos al preparar ese entorno; UI-001 conserva la revisión visual general.
+- **Evidencia actual:** Base histórica: requisito incorporado desde SRS-2026-11-04, inicialmente sin implementación. Cierre del 2026-11-17 bajo DEC-2026-11-17-14:
+  - Fábrica/Producción muestra disponible físico + tandas en proceso − pedidos pendientes por variante; conserva saldo firmado y muestra faltante max(0, −saldo). 10 + 4 − 20 = −6, necesidad 6. No registra órdenes de fabricación ni movimientos monetarios/físicos.
+  - Páginas de 25 variantes, incluidas aquellas sin movimientos; sumas completas de lotes y notas Confirmado/Parcial. Pruebas con 501 variantes y 205 notas verifican que no usa los recortes operativos anteriores. Recepción mueve proceso a depósito y despacho reduce stock/PP sin duplicar sus efectos; reintentos y anulación quedan cubiertos.
+  - Consulta transaccional de lectura sin incrementar el contador de auditoría. El test inspecciona SQL y comprueba ausencia de escrituras. ArticleDemand solo publica cantidades; ausencia real equivale a cero y una fuente fallida propaga error. Permisos production.manage/inventory.view comprobados en Application y presentación, con rechazo de permisos aislados de recepción, ventas y clientes.
+  - Suite completa: 124 pruebas/1490 aserciones aprobadas, incluidas 7 pruebas nuevas ProductionNeedsTest. Las 6 pruebas JavaScript, npm.cmd run build, Pint --dirty --test, node --check y git diff --check aprobados. Sin cambios de dependencias ni migraciones. El fallo de formato preexistente de bootstrap/providers.php conserva su alcance.
+  - Ensayo node tests/Browser/pending-orders.mjs en Chrome, base SQLite temporal, 1000 notas/5000 líneas, cinco sesiones y 30 observaciones: máximo 2350,12 ms. Comprueba fórmula renderizada, demanda después de altas/despacho/reintento/anulación/confirmación y conservación de formulario; móvil de 390 px sin desbordamiento del documento, con tabla desplazable. Capturas rf010-necesidades-desktop.png y rf010-necesidades-mobile.png en storage/app/private revisadas; reporte storage/logs/rf008-browser.json. El intento inicial de Edge falló por timeout DevTools; sus procesos de prueba fueron cerrados. La ejecución válida con Chrome completó su limpieza. No acredita red industrial, MySQL productivo ni RNF-001.
+  - RF-008 y RF-012 estaban HECHO antes de iniciar. Los errores anteriores de selectores operativos permanecen fuera de RF-010; la nueva consulta tiene paginación propia y conserva needs_page/article_page en navegación/refresco.
 
 ### [PENDIENTE] RF-011 — Identificar cada par y preparar picking con lectores y control de vencimientos
 

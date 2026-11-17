@@ -17,13 +17,16 @@ use Simon\InventarioTrazabilidad\Application\CatalogVariants;
 use Simon\InventarioTrazabilidad\Application\DispatchAuthorization;
 use Simon\InventarioTrazabilidad\Application\InventorySetup;
 use Simon\InventarioTrazabilidad\Application\InventoryStore;
+use Simon\InventarioTrazabilidad\Application\NeedsInventory;
 use Simon\InventarioTrazabilidad\Application\OrderFulfillment;
 use Simon\InventarioTrazabilidad\Application\TraceabilityRecords;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlInventory;
+use Simon\InventarioTrazabilidad\Infrastructure\SqlNeedsInventory;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlTraceability;
 use Simon\InventarioTrazabilidad\UI\Console\VerifyInventoryAudit;
 use Simon\Shared\Application\AccessPolicy;
 use Simon\Shared\Application\UnitOfWork;
+use Simon\VentasPedidos\Application\ArticleDemand;
 use Simon\VentasPedidos\Application\DispatchableOrders;
 use Simon\VentasPedidos\Application\DispatchedOrderReferences;
 use Simon\VentasPedidos\Application\OrderQueries;
@@ -65,6 +68,8 @@ class AppServiceProvider extends ServiceProvider
             DispatchableOrders::class => SqlOrderWorkflow::class,
             PendingOrderQueries::class => SqlPendingOrders::class,
             PendingDemand::class => QueryPendingOrders::class,
+            ArticleDemand::class => SqlPendingOrders::class,
+            NeedsInventory::class => SqlNeedsInventory::class,
         ];
 
         foreach ($bindings as $contract => $implementation) {

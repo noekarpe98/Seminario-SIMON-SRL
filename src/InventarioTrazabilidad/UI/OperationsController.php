@@ -13,6 +13,7 @@ use Simon\ClientesAdministracion\Application\ManageCustomers;
 use Simon\ClientesAdministracion\Infrastructure\SqlCustomers;
 use Simon\InventarioTrazabilidad\Application\MoveStock;
 use Simon\InventarioTrazabilidad\Application\PrepareInventory;
+use Simon\InventarioTrazabilidad\Application\QueryProductionNeeds;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlInventory;
 use Simon\Shared\Application\AccessPolicy;
 use Simon\Shared\UI\HandlesOperations;
@@ -27,7 +28,7 @@ final class OperationsController extends Controller
 {
     use HandlesOperations;
 
-    public function index(Request $request, AccessPolicy $access, SqlInventory $inventory, SqlCustomers $customers, ListOrders $sales, OrderFormData $orderForms, PendingDemand $demand): View
+    public function index(Request $request, AccessPolicy $access, SqlInventory $inventory, SqlCustomers $customers, ListOrders $sales, OrderFormData $orderForms, PendingDemand $demand, QueryProductionNeeds $needs): View
     {
         $permissions = [];
 
@@ -61,10 +62,12 @@ final class OperationsController extends Controller
         $overview = $inventory->overview($withStock);
         $operationId = (string) Str::uuid();
         $pendingProduction = null;
+        $productionNeeds = null;
 
         if ($section === 'production' && ($permissions['production.manage'] || $permissions['inventory.view'])) {
-            $pages = $request->validate(['article_page' => ['nullable', 'integer', 'min:1']]);
+            $pages = $request->validate(['article_page' => ['nullable', 'integer', 'min:1'], 'needs_page' => ['nullable', 'integer', 'min:1']]);
             $pendingProduction = $demand->forProduction($request->user()->id, (int) ($pages['article_page'] ?? 1));
+            $productionNeeds = $needs->handle($request->user()->id, (int) ($pages['needs_page'] ?? 1));
         }
 
         return view($request->routeIs('operations.snapshot') ? 'inventario::balances' : 'inventario::index', [
@@ -79,6 +82,7 @@ final class OperationsController extends Controller
             'audits' => $permissions['audit.view'] ? $inventory->recentAudit() : [],
             'operationId' => $operationId,
             'pendingProduction' => $pendingProduction,
+            'productionNeeds' => $productionNeeds,
             'orderForm' => $section === 'orders' && ($permissions['orders.create'] || $permissions['orders.manage']) ? $orderForms->make($request, $operationId) : null,
         ]);
     }

@@ -165,6 +165,11 @@ try {
             await until(async () => await evaluate(sessionId, 'document.readyState === "complete" && !!document.querySelector("[data-pending-report]")'));
             assert.equal(await evaluate(sessionId, 'Number(document.querySelector("[data-pending-report]").dataset.pendingPairs)'), data.totals[actor]);
             if (actor === 'production') {
+                assert.ok(await evaluate(sessionId, 'document.querySelectorAll("[data-needs-variant]").length > 0'));
+                assert.equal(await evaluate(sessionId, `Array.from(document.querySelectorAll('[data-needs-variant]')).every(row => {
+                    const cells = Array.from(row.cells).slice(1).map(cell => Number(cell.textContent));
+                    return cells[0] + cells[1] - cells[2] === cells[3] && Math.max(0, -cells[3]) === cells[4];
+                })`), true);
                 assert.equal(await evaluate(sessionId, 'document.body.textContent.includes("Cliente sintético")'), false);
                 await evaluate(sessionId, 'document.querySelector("input[name=lot]").value = "FORMULARIO-CONSERVADO"');
             }
@@ -203,6 +208,7 @@ try {
                 measurements.push({ action: label, ...result });
             }
             assert.equal(await evaluate(pages.production, 'document.querySelector("input[name=lot]").value'), 'FORMULARIO-CONSERVADO');
+            assert.equal(await evaluate(pages.production, `Number(document.querySelector('[data-needs-variant="${data.variant_id}"] td:nth-child(4)').textContent) === Number(document.querySelector('[data-pending-variant-id="${data.variant_id}"] td:last-child').textContent)`), true);
             console.log(`Medición aprobada: ${label}`);
         };
         await measure('alta S', { action: 'create', actor_id: data.actors.S.id, origin: 'S', token: randomUUID(), customer_id: data.customer_id, variant_id: data.variant_id, quantity: 13 }, 13, 'S');
@@ -214,6 +220,8 @@ try {
         await measure('confirmación borrador', { action: 'confirm', actor_id: data.actors.S.id, token: randomUUID(), ...data.target }, 21, 'S');
 
         const screenshots = path.join(root, 'storage/app/private');
+        const needsDesktop = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, pages.production);
+        await writeFile(path.join(screenshots, 'rf010-necesidades-desktop.png'), Buffer.from(needsDesktop.data, 'base64'));
         const desktop = await send('Page.captureScreenshot', { format: 'png' }, pages.admin);
         await writeFile(path.join(screenshots, 'rf008-pendientes-desktop.png'), Buffer.from(desktop.data, 'base64'));
         await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true }, pages.production);
@@ -222,6 +230,7 @@ try {
         await until(async () => await evaluate(pages.production, 'document.readyState === "complete" && !!document.querySelector("[data-pending-report]")'));
         assert.equal(await evaluate(pages.production, 'document.documentElement.scrollWidth <= innerWidth'), true);
         const mobile = await send('Page.captureScreenshot', { format: 'png' }, pages.production);
+        await writeFile(path.join(screenshots, 'rf010-necesidades-mobile.png'), Buffer.from(mobile.data, 'base64'));
         await writeFile(path.join(screenshots, 'rf008-produccion-mobile.png'), Buffer.from(mobile.data, 'base64'));
         const result = { browser: browserPath, node: process.version, php: phpPath, database: 'SQLite temporal', httpWorkers: 5, initialOrders: data.orders, initialLines: data.lines, actors: 5, measurements, maximumMs: Math.max(...measurements.map((entry) => entry.milliseconds)), limitMs: 5000, note: 'Ensayo local con datos sintéticos y cinco contextos activos de navegador; no acredita red industrial, volumen real ni MySQL productivo.' };
         await writeFile(path.join(root, 'storage/logs/rf008-browser.json'), JSON.stringify(result, null, 2));

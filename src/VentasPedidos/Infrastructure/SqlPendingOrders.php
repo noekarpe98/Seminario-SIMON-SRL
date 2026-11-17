@@ -4,11 +4,21 @@ namespace Simon\VentasPedidos\Infrastructure;
 
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Simon\VentasPedidos\Application\ArticleDemand;
 use Simon\VentasPedidos\Application\PendingOrderQueries;
 use Simon\VentasPedidos\Domain\OrderStatus;
 
-final class SqlPendingOrders implements PendingOrderQueries
+final class SqlPendingOrders implements ArticleDemand, PendingOrderQueries
 {
+    public function quantities(array $variantIds): array
+    {
+        return DB::table('business_orders as orders')->join('business_order_lines as lines', 'lines.order_id', '=', 'orders.id')
+            ->whereIn('orders.status', [OrderStatus::Confirmed->value, OrderStatus::Partial->value])
+            ->whereColumn('lines.quantity', '>', 'lines.dispatched')->whereIn('lines.variant_id', $variantIds)
+            ->groupBy('lines.variant_id')->selectRaw('lines.variant_id, SUM(lines.quantity - lines.dispatched) as pairs')
+            ->get()->mapWithKeys(fn (object $row): array => [(int) $row->variant_id => (int) $row->pairs])->all();
+    }
+
     public function snapshot(?int $sellerId, ?string $origin, int $customerPage, int $articlePage, bool $includeCustomers): array
     {
         return DB::transaction(function () use ($sellerId, $origin, $customerPage, $articlePage, $includeCustomers): array {

@@ -95,3 +95,7 @@ Procedimiento: [skill de arquitectura](../../.agents/skills/arquitectura-hexagon
 ## Verificación del traslado
 
 REF-001 valida autoload optimizado con PSR-4 estricto, modelo/factory de autenticación, descubrimiento de comandos y migraciones desde src, preservación del identificador de la migración instalada, rutas, auditoría y regresión completa de operaciones. Composer conserva las versiones de dependencias. El kit y las skills se actualizan a la referencia 04f621f12421e819bfeb1cc1518c4e864617d14e, reteniendo las correcciones Windows.
+
+## Proyección de necesidades RF-010
+
+QueryProductionNeeds coordina NeedsInventory y ArticleDemand con permisos production.manage o inventory.view. SqlNeedsInventory obtiene una página de 25 variantes y agrega todos sus lotes y tandas; SqlPendingOrders publica cantidades pendientes por variante desde tablas propias de ventas. La consulta se ejecuta dentro de una transacción de lectura sobre la misma conexión local, sin usar el UnitOfWork que incrementa el contador de auditoría. Domain/Application no incorporan Laravel. La UI se integra en Fábrica/Producción y reutiliza el refresco existente, conservando ambas páginas. La consistencia de otro motor productivo requiere su propia comprobación.
