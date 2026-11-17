@@ -95,3 +95,7 @@ Procedimiento: [skill de arquitectura](../../.agents/skills/arquitectura-hexagon
 ## Verificación del traslado
 
 REF-001 valida autoload optimizado con PSR-4 estricto, modelo/factory de autenticación, descubrimiento de comandos y migraciones desde src, preservación del identificador de la migración instalada, rutas, auditoría y regresión completa de operaciones. Composer conserva las versiones de dependencias. El kit y las skills se actualizan a la referencia 04f621f12421e819bfeb1cc1518c4e864617d14e, reteniendo las correcciones Windows.
+
+## Selección y confirmación de despachos RF-014
+
+PrepareDispatch en Application de InventarioTrazabilidad coordina DispatchQueue (contrato publicado de VentasPedidos), DispatchStock, CatalogVariants y CustomerDirectory. SqlDispatchQueue obtiene notas/líneas con saldo desde ventas y SqlDispatchStock consulta lotes de inventario; sus interfaces no dependen de Laravel. La UI mantiene las rutas/panel Filament existentes y sus permisos de servidor. Las escrituras siguen pasando por MoveStock y SqlOrderFulfillment bajo UnitOfWork, con saldos condicionados, bloqueo compartido y auditoría atómica. Se completa el recorrido existente sin crear un contexto logístico para documentos aún pospuestos.

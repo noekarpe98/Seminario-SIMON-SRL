@@ -138,4 +138,58 @@ class OrderConcurrencyTest extends TestCase
         $this->assertDatabaseHas('business_order_lines', ['dispatched' => $dispatched ? 4 : 0]);
         $this->assertSame($dispatched ? 2 : 1, app(SqlInventory::class)->verify()['sequence']);
     }
+
+    /** @return array<string,mixed> */
+    private function dispatchRequest(int $stock = 20): array
+    {
+        $request = $this->registration();
+        $order = app(RegisterOrder::class)->handle($this->admin->id, $request['token'], $this->customerId, 'F', $request['lines']);
+        app(ManageCustomers::class)->authorize($this->admin->id, $order, true, true, 'Autorización concurrente');
+        app(MoveStock::class)->opening($this->admin->id, (string) Str::uuid(), $this->variantId, 'LOTE-DOBLE', '2026-01-01', $stock);
+
+        return ['action' => 'dispatch', 'actor_id' => $this->admin->id, 'token' => (string) Str::uuid(), 'line_id' => DB::table('business_order_lines')->value('id'), 'batch_id' => DB::table('inventory_batches')->value('id'), 'quantity' => 4];
+    }
+
+    public function test_two_simultaneous_partial_dispatches_complete_the_exact_pending_quantity(): void
+    {
+        $request = $this->dispatchRequest();
+        $results = $this->concurrently([$request, [...$request, 'token' => (string) Str::uuid(), 'quantity' => 6]]);
+        $this->assertSame([true, true], array_column($results, 'accepted'));
+        $this->assertDatabaseHas('business_orders', ['status' => 'Entregado', 'revision' => 2]);
+        $this->assertDatabaseHas('business_order_lines', ['dispatched' => 10]);
+        $this->assertDatabaseHas('inventory_batches', ['quantity' => 10]);
+        $this->assertSame(3, app(SqlInventory::class)->verify()['sequence']);
+    }
+
+    public function test_simultaneous_retries_of_one_dispatch_only_decrease_stock_once(): void
+    {
+        $request = $this->dispatchRequest();
+        $results = $this->concurrently([$request, $request]);
+        $this->assertSame([true, true], array_column($results, 'accepted'));
+        $this->assertSame($results[0]['id'], $results[1]['id']);
+        $this->assertDatabaseHas('business_orders', ['status' => 'Parcial', 'revision' => 1]);
+        $this->assertDatabaseHas('business_order_lines', ['dispatched' => 4]);
+        $this->assertDatabaseHas('inventory_batches', ['quantity' => 16]);
+        $this->assertSame(2, app(SqlInventory::class)->verify()['sequence']);
+    }
+
+    public function test_simultaneous_dispatches_cannot_exceed_the_order_balance(): void
+    {
+        $request = [...$this->dispatchRequest(), 'quantity' => 7];
+        $results = $this->concurrently([$request, [...$request, 'token' => (string) Str::uuid()]]);
+        $this->assertSame(1, count(array_filter($results, fn (array $result): bool => $result['accepted'])));
+        $this->assertDatabaseHas('business_order_lines', ['dispatched' => 7]);
+        $this->assertDatabaseHas('inventory_batches', ['quantity' => 13]);
+        $this->assertSame(2, app(SqlInventory::class)->verify()['sequence']);
+    }
+
+    public function test_simultaneous_dispatches_cannot_exceed_the_physical_stock(): void
+    {
+        $request = $this->dispatchRequest(6);
+        $results = $this->concurrently([$request, [...$request, 'token' => (string) Str::uuid()]]);
+        $this->assertSame(1, count(array_filter($results, fn (array $result): bool => $result['accepted'])));
+        $this->assertDatabaseHas('business_order_lines', ['dispatched' => 4]);
+        $this->assertDatabaseHas('inventory_batches', ['quantity' => 2]);
+        $this->assertSame(2, app(SqlInventory::class)->verify()['sequence']);
+    }
 }

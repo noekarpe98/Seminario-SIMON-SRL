@@ -48,11 +48,5 @@ document.querySelectorAll('[data-order-form]').forEach((form) => {
         add.focus();
     });
     container.addEventListener('change', validateDuplicates);
-    form.addEventListener('submit', (event) => {
-        if (form.dataset.addressLoading === 'true') {
-            event.preventDefault();
-            form.querySelector('[data-address-status]').textContent = 'Esperá a que termine la consulta de direcciones antes de confirmar.';
-        }
-    });
     updateRows();
 });

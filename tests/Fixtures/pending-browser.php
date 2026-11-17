@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Simon\Acceso\Infrastructure\Persistence\User;
+use Simon\ClientesAdministracion\Application\DeliveryAddresses;
+use Simon\ClientesAdministracion\Application\ManageAddresses;
 use Simon\ClientesAdministracion\Application\ManageCustomers;
 use Simon\InventarioTrazabilidad\Application\MoveStock;
 use Simon\InventarioTrazabilidad\Application\PrepareInventory;
@@ -100,6 +102,18 @@ if ($argv[1] === 'setup') {
 $request = json_decode(base64_decode($argv[2]), true, flags: JSON_THROW_ON_ERROR);
 
 switch ($request['action']) {
+    case 'prepare_partial':
+        $address = app(ManageAddresses::class)->save($request['actor_id'], $request['customer_id'], null, 'Central RF014', 'Calle Central 100', 'Posadas', 'Misiones');
+        $alternate = app(ManageAddresses::class)->save($request['actor_id'], $request['customer_id'], null, 'Sucursal RF014', 'Calle Alternativa 200', 'Oberá', 'Misiones');
+        $lines = DB::table('business_order_lines')->where('order_id', $request['order_id'])->orderBy('id')->get();
+        DB::table('business_order_lines')->where('id', $lines[0]->id)->update(['quantity' => 10]);
+        DB::table('business_order_lines')->where('id', $lines[1]->id)->update(['quantity' => 3]);
+        DB::table('business_order_lines')->where('order_id', $request['order_id'])->whereNotIn('id', [$lines[0]->id, $lines[1]->id])->delete();
+        $destination = app(DeliveryAddresses::class)->snapshot($request['customer_id'], $address);
+        DB::table('business_orders')->where('id', $request['order_id'])->update(['delivery_address_id' => $address, 'delivery_destination' => json_encode($destination, JSON_THROW_ON_ERROR)]);
+        $movement = app(MoveStock::class)->opening($request['actor_id'], (string) Str::uuid(), $lines[1]->variant_id, 'RF014-SEGUNDO', '2026-01-01', 3);
+        echo json_encode(['alternate_id' => $alternate, 'second_line_id' => $lines[1]->id, 'second_batch_id' => DB::table('inventory_movements')->where('id', $movement)->value('batch_id')], JSON_THROW_ON_ERROR);
+        exit;
     case 'create':
         app(RegisterOrder::class)->handle($request['actor_id'], $request['token'], $request['customer_id'], $request['origin'], [['variant_id' => $request['variant_id'], 'quantity' => $request['quantity']]]);
         break;

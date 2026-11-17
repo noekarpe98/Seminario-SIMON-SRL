@@ -15,10 +15,12 @@ use Simon\ClientesAdministracion\Infrastructure\SqlCustomers;
 use Simon\ClientesAdministracion\Infrastructure\SqlDeliveryAddresses;
 use Simon\InventarioTrazabilidad\Application\CatalogVariants;
 use Simon\InventarioTrazabilidad\Application\DispatchAuthorization;
+use Simon\InventarioTrazabilidad\Application\DispatchStock;
 use Simon\InventarioTrazabilidad\Application\InventorySetup;
 use Simon\InventarioTrazabilidad\Application\InventoryStore;
 use Simon\InventarioTrazabilidad\Application\OrderFulfillment;
 use Simon\InventarioTrazabilidad\Application\TraceabilityRecords;
+use Simon\InventarioTrazabilidad\Infrastructure\SqlDispatchStock;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlInventory;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlTraceability;
 use Simon\InventarioTrazabilidad\UI\Console\VerifyInventoryAudit;
@@ -26,12 +28,14 @@ use Simon\Shared\Application\AccessPolicy;
 use Simon\Shared\Application\UnitOfWork;
 use Simon\VentasPedidos\Application\DispatchableOrders;
 use Simon\VentasPedidos\Application\DispatchedOrderReferences;
+use Simon\VentasPedidos\Application\DispatchQueue;
 use Simon\VentasPedidos\Application\OrderQueries;
 use Simon\VentasPedidos\Application\OrderRegistration;
 use Simon\VentasPedidos\Application\OrderWorkflow;
 use Simon\VentasPedidos\Application\PendingDemand;
 use Simon\VentasPedidos\Application\PendingOrderQueries;
 use Simon\VentasPedidos\Application\QueryPendingOrders;
+use Simon\VentasPedidos\Infrastructure\SqlDispatchQueue;
 use Simon\VentasPedidos\Infrastructure\SqlOrderFulfillment;
 use Simon\VentasPedidos\Infrastructure\SqlOrderRegistration;
 use Simon\VentasPedidos\Infrastructure\SqlOrderWorkflow;
@@ -65,6 +69,8 @@ class AppServiceProvider extends ServiceProvider
             DispatchableOrders::class => SqlOrderWorkflow::class,
             PendingOrderQueries::class => SqlPendingOrders::class,
             PendingDemand::class => QueryPendingOrders::class,
+            DispatchQueue::class => SqlDispatchQueue::class,
+            DispatchStock::class => SqlDispatchStock::class,
         ];
 
         foreach ($bindings as $contract => $implementation) {

@@ -35,22 +35,30 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Próximo paso:** retomar documentos cuando se solicite ese módulo; remitos actuales son manuales y las hojas de ruta quedan para el módulo específico LOG-001
 - **Evidencia actual:** Requisito RF13 incorporado desde la fuente conservada; sin implementación ni pruebas funcionales específicas observadas. Dependencias, contratos y casos de prueba son descomposición técnica del plan, no decisiones comerciales adicionales.
 
-### [PARCIAL] RF-014 — Confirmar despachos parciales y reducir el saldo hasta completar el pedido
+### [HECHO] RF-014 — Confirmar despachos parciales y reducir el saldo hasta completar el pedido
 
 - **Capa:** SOLICITADO
-- **Fuente:** SRS-2026-11-04, RF14; aclaraciones posteriores SRS-ACL-2026-11-04; DEC-2026-11-04-05
-- **Contexto propietario:** LogisticaPostventa (frontera propuesta)
+- **Fuente:** SRS-2026-11-04, RF14; aclaraciones posteriores SRS-ACL-2026-11-04; DEC-2026-11-04-05; autorización del usuario 2026-11-17 «SIGUE CON ESA» tras recomendar RF-014; DEC-2026-11-17-15
+- **Contexto propietario:** InventarioTrazabilidad (salida física) y VentasPedidos (saldo/estado); LogisticaPostventa conserva la frontera propuesta de documentos y rutas
 - **Dependencias:** INV-001
 - **Alcance:** Entregar parte de una nota, registrar cantidades efectivas y actualizar automáticamente su saldo adeudado hasta la finalización.
 - **Fuera de alcance:** Cerrar la nota completa por una entrega parcial o descontar mercadería aún no despachada.
 - **Invariantes:** Una misma entrega no se descuenta dos veces; no descontar cantidades superiores al saldo según la regla acordada. Validación administrativa, trazabilidad y movimiento físico deben corresponder a la misma operación.
-- **Contratos y archivos previstos:** Propuesta: caso de uso de confirmación de entrega y contratos de autorización, trazabilidad, salida física y aplicación de cantidades entregadas al pedido.
+- **Contratos y archivos previstos:** PrepareDispatch/DispatchStock/SqlDispatchStock en InventarioTrazabilidad; DispatchQueue/SqlDispatchQueue en VentasPedidos; composición en AppServiceProvider. MoveStock/SqlOrderFulfillment conservan las escrituras transaccionales. Vistas dispatch-form/dispatch-pagination y OperationsController; pruebas PartialDispatchTest, OrderConcurrencyTest, dispatch-addresses.test.mjs y ensayo pending-orders.mjs --dispatch.
 - **Criterios de aceptación:** En una nota de 10 pares, entregar 4 deja 6 pendientes y entregar los 6 restantes cierra el saldo; se prueban parciales por artículo, reintentos y dos confirmaciones concurrentes. Un fallo no deja un saldo o stock definitivo incoherente; la estrategia de coordinación se define antes de implementar.
 - **Responsable:** Codex
 - **Fecha de inicio:** 2026-11-04
-- **Última actualización:** 2026-11-04
-- **Próximo paso:** completar recorridos logísticos, destinos y documentación sobre el núcleo de parciales autorizado
-- **Evidencia actual:** El corte actualiza pedido Confirmado → Parcial → Entregado al despachar cantidades y protege saldo/stock con transacción, CAS e idempotencia. Las pruebas 10→4→6 verifican saldos sin cancelar cuenta corriente; los recorridos logísticos completos siguen pendientes.
+- **Última actualización:** 2026-11-17
+- **Próximo paso:** ninguno de implementación en RF-014; cerrada el 2026-11-17. Validar motor/red productivos al preparar operación. RF-003, SEC-001/RNF-003 y los documentos/rutas de RF-013/LOG-001 conservan su alcance y estado; no se inicia otra tarea en este cierre.
+- **Evidencia actual:** Base histórica de INV-001: Confirmado → Parcial → Entregado, transacción, CAS e idempotencia, con pruebas iniciales 10→4→6; entonces permanecían recorridos por completar. Cierre del 2026-11-17 bajo DEC-2026-11-17-15:
+  - Fábrica/Despachos y Administración/Autorizaciones usan la cola paginada de todas las notas Confirmado/Parcial con saldo, ordenadas por antigüedad y buscables por número literal. Los lotes se filtran por artículos pendientes de la página y lote exacto; 25 filas por página sin recorte a las últimas 200 notas ni 500 lotes. Las descripciones se resuelven por contratos, también después de 500 variantes.
+  - Entregas parciales por artículo/lote mantienen los demás saldos y solo cierran la nota al terminar todas las líneas. Cada entrega conserva su propio destino y autorización en la firma; el historial RF-009 muestra las direcciones efectivamente utilizadas. Los reintentos no vuelven a descontar stock ni saldo y no registran cobros.
+  - Siete pruebas nuevas PartialDispatchTest: nota antigua seleccionable y autorizable tras 205 notas terminadas; 27 notas/501 lotes con páginas/filtros; descripción de variante fuera de las primeras 500; nota de dos artículos con 4+6 y 3 pares en tres lotes y destinos distintos; reversión de saldo/stock/estado ante fallo de auditoría con recuperación del formulario; permisos en Application/HTTP; filtros inválidos y colas vacías.
+  - Cuatro pruebas nuevas con procesos PHP independientes y barrera compartida en SQLite temporal: dos despachos de 4+6 se confirman y completan 10; dos reintentos idénticos devuelven un movimiento; 7+7 no supera saldo 10; 4+4 no supera stock 6. Tras cada escenario se verifican cantidades, estado/revisión y cadena firmada. Se conserva además la prueba de despacho frente a anulación concurrente.
+  - Cinco pruebas JavaScript nuevas comprueban espera de direcciones, recuperación del destino elegido, selección explícita si desapareció, error de consulta sin descarte silencioso y rechazo de respuestas atrasadas de otro cliente. Las seis pruebas existentes del refresco permanecen aprobadas.
+  - Verificación final: suite completa 135 pruebas/1629 aserciones aprobadas; node --test tests/JavaScript/*.test.mjs aprobó 11 pruebas; npm.cmd run build, node --check, Pint --dirty --test y git diff --check aprobados. Sin dependencias ni migraciones nuevas. La base real no recibió datos sintéticos.
+  - node tests/Browser/pending-orders.mjs --dispatch, Chrome con SQLite temporal y 1000 notas iniciales, verificó selección de nota antigua, rechazo de exceso con cantidad/dirección conservadas, parcial 4 y saldo 6, cierre solo después del segundo artículo, destinos históricos y móvil de 390 px sin desbordamiento del documento. Capturas rf014-despachos-desktop.png y rf014-despachos-mobile.png en storage/app/private revisadas; reporte storage/logs/rf014-browser.json. Las ejecuciones iniciales tuvieron esperas agotadas en condiciones del ensayo; la verificación final comprueba saldos renderizados e historia persistida sin depender del aviso temporal de éxito y pasó. Los procesos/perfil/base temporales del ensayo final se cerraron y eliminaron.
+  - INV-001 estaba HECHO antes de reanudar; se conserva su regresión. El cierre acredita los criterios físicos de RF-014, no remitos/hojas de ruta, devoluciones, revisión visual general UI-001, hardware industrial ni comportamiento de MySQL/red productivos.
 
 ### [PENDIENTE] RF-015 — Registrar devoluciones, notas de pedido negativas y reintegro de stock
 

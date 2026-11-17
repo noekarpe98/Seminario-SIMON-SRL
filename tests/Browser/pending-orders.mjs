@@ -118,8 +118,60 @@ try {
         return response.result.value;
     };
     const pages = {};
-    inspectPages = async () => await Promise.all(Object.entries(pages).map(async ([actor, session]) => ({ actor, page: await evaluate(session, '({url: location.href, ready: document.readyState, title: document.title, text: document.body?.innerText.slice(0,400), measurements: window.pendingMeasurements?.slice(-2)})') })));
-    if (process.argv.includes('--traceability')) {
+    inspectPages = async () => await Promise.all(Object.entries(pages).map(async ([actor, session]) => ({ actor, page: await evaluate(session, `({url: location.href, ready: document.readyState, title: document.title, text: document.body?.innerText.slice(-1700), form: Array.from(document.querySelectorAll('[data-address-selector] select,[data-address-selector] input:not([type=hidden])')).map(el => ({name:el.name,value:el.value,valid:el.checkValidity(),message:el.validationMessage})), measurements: window.pendingMeasurements?.slice(-2)})`) })));
+    if (process.argv.includes('--dispatch')) {
+        stage = 'despachos parciales RF014';
+        const extra = await fixture('mutate', { action: 'prepare_partial', actor_id: data.actors.admin.id, customer_id: data.customer_id, ...data.target });
+        const { browserContextId } = await send('Target.createBrowserContext');
+        const { targetId } = await send('Target.createTarget', { url: 'about:blank', browserContextId });
+        const { sessionId } = await send('Target.attachToTarget', { targetId, flatten: true });
+        pages.dispatch = sessionId;
+        await send('Page.enable', {}, sessionId);
+        await send('Network.setCookie', { name: data.cookie_name, value: data.actors.admin.cookie, url: base }, sessionId);
+        await send('Emulation.setDeviceMetricsOverride', { width: 1365, height: 1000, deviceScaleFactor: 1, mobile: false }, sessionId);
+        await send('Page.navigate', { url: `${base}/admin/despachos?order_number=NP-000001` }, sessionId);
+        await until(async () => await evaluate(sessionId, 'document.readyState === "complete" && !!document.querySelector("[name=order_line_id]")'));
+        assert.equal(await evaluate(sessionId, `!!document.querySelector('[name=order_line_id] option[value="${data.target.line_id}"]')`), true);
+        assert.equal(await evaluate(sessionId, 'document.body.innerText.includes("Crédito sintético privado")'), false);
+        const submitDispatch = async (line, batch, quantity, address = '') => {
+            await evaluate(sessionId, `(() => {
+                const form = document.querySelector('[data-address-selector]');
+                const line = form.querySelector('[name=order_line_id]');
+                line.value = '${line}'; line.dispatchEvent(new Event('change'));
+                form.querySelector('[name=batch_id]').value = '${batch}';
+                form.querySelector('[name=quantity]').value = '${quantity}';
+            })()`);
+            await until(async () => await evaluate(sessionId, '!document.querySelector("[data-address-selector]").dataset.addressLoading'));
+            await evaluate(sessionId, `document.querySelector('[name=delivery_address_id]').value = '${address}'; document.querySelector('[data-address-selector]').requestSubmit()`);
+        };
+        stage = 'RF014 rechazo del exceso';
+        await submitDispatch(data.target.line_id, data.target.batch_id, 11, extra.alternate_id);
+        await until(async () => await evaluate(sessionId, 'document.readyState === "complete" && document.body.innerText.includes("La cantidad supera el saldo")'));
+        assert.equal(await evaluate(sessionId, 'document.querySelector("[name=quantity]").value'), '11');
+        stage = 'RF014 recuperación de dirección';
+        await until(async () => await evaluate(sessionId, `document.querySelector('[name=delivery_address_id]').value === '${extra.alternate_id}'`));
+        stage = 'RF014 primer parcial';
+        await submitDispatch(data.target.line_id, data.target.batch_id, 4, extra.alternate_id);
+        await until(async () => await evaluate(sessionId, `document.readyState === 'complete' && !document.querySelector('[role=alert]') && document.querySelector('[name=order_line_id] option[value="${data.target.line_id}"]')?.textContent.includes('6 pares pendientes')`));
+        const desktop = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, sessionId);
+        await writeFile(path.join(root, 'storage/app/private/rf014-despachos-desktop.png'), Buffer.from(desktop.data, 'base64'));
+        await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true }, sessionId);
+        assert.equal(await evaluate(sessionId, 'document.documentElement.scrollWidth <= innerWidth'), true);
+        const mobile = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true }, sessionId);
+        await writeFile(path.join(root, 'storage/app/private/rf014-despachos-mobile.png'), Buffer.from(mobile.data, 'base64'));
+        stage = 'RF014 saldo del primer artículo';
+        await submitDispatch(data.target.line_id, data.target.batch_id, 6);
+        await until(async () => await evaluate(sessionId, `document.readyState === 'complete' && !document.querySelector('[role=alert]') && !document.querySelector('[name=order_line_id] option[value="${data.target.line_id}"]') && !!document.querySelector('[name=order_line_id] option[value="${extra.second_line_id}"]')`));
+        stage = 'RF014 cierre del segundo artículo';
+        await submitDispatch(extra.second_line_id, extra.second_batch_id, 3);
+        await until(async () => await evaluate(sessionId, 'document.readyState === "complete" && document.body.innerText.includes("No hay pedidos con saldo que coincidan")'));
+        await send('Page.navigate', { url: `${base}/admin/trazabilidad?lot=LOTE-ENSAYO` }, sessionId);
+        await until(async () => await evaluate(sessionId, 'document.readyState === "complete" && document.querySelectorAll("[data-trace-movement]").length === 2'));
+        assert.equal(await evaluate(sessionId, 'document.body.innerText.includes("Calle Alternativa 200") && document.body.innerText.includes("Calle Central 100")'), true);
+        const result = { checks: ['nota antigua con saldo', 'exceso rechazado y formulario conservado', 'destino alternativo conservado', '10→4→6', 'cierre solo tras todos los artículos', 'historia por destino', 'móvil sin desbordamiento'], initialOrders: data.orders, database: 'SQLite temporal', note: 'Ensayo funcional RF-014 con Chrome; no acredita motor/red productivos.' };
+        await writeFile(path.join(root, 'storage/logs/rf014-browser.json'), JSON.stringify(result, null, 2));
+        console.log(JSON.stringify(result));
+    } else if (process.argv.includes('--traceability')) {
         stage = 'trazabilidad';
         for (let index = 0; index < 2; index++) {
             await fixture('mutate', { action: 'dispatch', actor_id: data.actors.admin.id, token: randomUUID(), ...data.target });
