@@ -37,6 +37,14 @@ RF-008 agrega PendingOrderQueries/QueryPendingOrders para los resúmenes de toda
 
 RF-009 agrega TraceabilityFilter y SearchTraceability/TraceabilityRecords en InventarioTrazabilidad; SqlTraceability consulta el contenido firmado de sus movimientos/auditorías y valida cada fila antes de publicarla. VentasPedidos publica DispatchedOrderReferences para resolver referencias antiguas sin consultar sus tablas desde inventario. MoveStock agrega a nuevas firmas copias de pedido, cliente y variante usando contratos, conservando el digest de solicitud y los reintentos históricos. Las firmas anteriores se mantienen intactas y la UI diferencia referencia actual de identidad guardada; nunca reconstruye un destino histórico ausente. DEC-2026-11-05-13 conserva políticas, permisos y límites.
 
+RF-010 agrega ProductionProjection en Domain y QueryProductionNeeds/ProductionPlanningQueries en Application de InventarioTrazabilidad. SqlProductionPlanning agrega stock físico y tandas propias por artículo, pagina todo el catálogo y envuelve la composición en una lectura transaccional: un bloqueo compartido del coordinador existente impide mezclar estados de movimientos/pedidos sin escribir su contador. VentasPedidos amplía PendingDemand con cantidades por los IDs solicitados; solo SqlPendingOrders consulta sus tablas. ReadSourceUnavailable distingue fallos de lectura de una fuente válida con cero pares. La composición registra el adaptador y la UI conserva el panel Producción y su refresco, con tabla de escritorio y tarjetas móviles. DEC-2026-11-10-02 precisa fórmula, permisos y límites.
+
+RF-011 incorpora la entidad PairUnit y el valor SupplyExpiry en InventarioTrazabilidad. ManagePicking y ManageSupplies escriben mediante PairUnits/SupplyLots y el coordinador transaccional existente. MoveStock integra los códigos seleccionados en el despacho firmado y conserva los reintentos previos; la identificación por lote se activa explícitamente y no inventa historia individual. Los adaptadores SQL solo consultan tablas propias; las líneas de pedido se resuelven por OrderFulfillment. Picking e Insumos comparten el panel Filament y quedan protegidos por permisos y un control de disponibilidad del esquema durante su activación. DEC-2026-11-11-01 registra alcance, compatibilidad y la aplicación pendiente de la migración.
+
+FIN-001 concreta la cuenta corriente en ClientesAdministracion por su propiedad sobre el cliente y su deuda manual. Money representa unidades menores/moneda/precisión; CurrentAccount protege apertura, signos, moneda y conciliación. ManageCurrentAccounts coordina CurrentAccountRecords y los contratos propios de clientes. SqlCurrentAccounts bloquea la cuenta y conserva asientos inmutables, sin usar tablas ni el coordinador de inventario. La UI comparte Filament y exige permisos financieros separados; la inicialización ausente se presenta como desconocida. DEC-2026-11-11-02/03 conservan la moneda inicial ARS, los límites y la activación pendiente del esquema.
+
+La refactorización de RF-003 añade QueryDispatchAuthorizations en ClientesAdministracion para componer el listado paginado y el detalle mediante OrderQueries, CustomerDirectory, CustomerRecords y CatalogVariants. Cada adaptador consulta tablas de su contexto; la autorización de lectura se verifica en Application y en cada solicitud Livewire. La consulta no escribe ni altera la vigencia de las autorizaciones. DEC-2026-11-11-04 registra alcance y límites.
+
 ## Mapa preliminar de contextos
 
 Fuente: [SRS-2026-11-04, alcance y preguntas](../plan-maestro/02-requisitos-y-alcance.md). La agrupación funcional proviene del adjunto; su correspondencia con bounded contexts y los nombres de código son una propuesta técnica, no una decisión comercial confirmada.
@@ -86,6 +94,8 @@ No se crearon modelos Eloquent de negocio; la infraestructura usa Query Builder 
 
 No se adoptan microservicios, CQRS, event sourcing, outbox o un bus por defecto; registrar su necesidad si un recorrido lo justifica.
 
+DEC-2026-11-10-01 y DAT-002 establecen MySQL/base simonsrl para el sistema. La conexión local mysql utiliza el servidor MariaDB 10.4.32 de XAMPP; la configuración y .env.example se alinean con esa elección. La transferencia desde SQLite conserva cuenta, permisos, metadatos y respaldo. Los nuevos movimientos almacenan y firman fecha UTC en formato SQL con precisión de segundos para ajustarse al timestamp existente, sin modificar firmas anteriores. Las pruebas SQLite históricas conservan su alcance; la verificación MySQL local se registra por separado en DAT-002 y no acredita concurrencia ni rendimiento productivos.
+
 ## Verificación
 
 Al recibir requisitos, probar invariantes, casos de uso y contratos; agregar pruebas de adaptadores, permisos, concurrencia y UI según los criterios afectados. SQLite local no acredita concurrencia sobre otro motor. Las pruebas actuales comprueban el esqueleto, no reglas de negocio.
@@ -95,7 +105,3 @@ Procedimiento: [skill de arquitectura](../../.agents/skills/arquitectura-hexagon
 ## Verificación del traslado
 
 REF-001 valida autoload optimizado con PSR-4 estricto, modelo/factory de autenticación, descubrimiento de comandos y migraciones desde src, preservación del identificador de la migración instalada, rutas, auditoría y regresión completa de operaciones. Composer conserva las versiones de dependencias. El kit y las skills se actualizan a la referencia 04f621f12421e819bfeb1cc1518c4e864617d14e, reteniendo las correcciones Windows.
-
-## Proyección de necesidades RF-010
-
-QueryProductionNeeds coordina NeedsInventory y ArticleDemand con permisos production.manage o inventory.view. SqlNeedsInventory obtiene una página de 25 variantes y agrega todos sus lotes y tandas; SqlPendingOrders publica cantidades pendientes por variante desde tablas propias de ventas. La consulta se ejecuta dentro de una transacción de lectura sobre la misma conexión local, sin usar el UnitOfWork que incrementa el contador de auditoría. Domain/Application no incorporan Laravel. La UI se integra en Fábrica/Producción y reutiliza el refresco existente, conservando ambas páginas. La consistencia de otro motor productivo requiere su propia comprobación.

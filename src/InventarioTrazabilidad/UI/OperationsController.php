@@ -16,6 +16,7 @@ use Simon\InventarioTrazabilidad\Application\PrepareInventory;
 use Simon\InventarioTrazabilidad\Application\QueryProductionNeeds;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlInventory;
 use Simon\Shared\Application\AccessPolicy;
+use Simon\Shared\Application\ReadSourceUnavailable;
 use Simon\Shared\UI\HandlesOperations;
 use Simon\VentasPedidos\Application\ListOrders;
 use Simon\VentasPedidos\Application\PendingDemand;
@@ -63,11 +64,19 @@ final class OperationsController extends Controller
         $operationId = (string) Str::uuid();
         $pendingProduction = null;
         $productionNeeds = null;
+        $planningUnavailable = false;
 
         if ($section === 'production' && ($permissions['production.manage'] || $permissions['inventory.view'])) {
             $pages = $request->validate(['article_page' => ['nullable', 'integer', 'min:1'], 'needs_page' => ['nullable', 'integer', 'min:1']]);
-            $pendingProduction = $demand->forProduction($request->user()->id, (int) ($pages['article_page'] ?? 1));
-            $productionNeeds = $needs->handle($request->user()->id, (int) ($pages['needs_page'] ?? 1));
+
+            try {
+                $productionNeeds = $needs->handle($request->user()->id, (int) ($pages['needs_page'] ?? 1));
+                $pendingProduction = $demand->forProduction($request->user()->id, (int) ($pages['article_page'] ?? 1));
+            } catch (ReadSourceUnavailable $exception) {
+                report($exception);
+                $planningUnavailable = true;
+                $productionNeeds = null;
+            }
         }
 
         return view($request->routeIs('operations.snapshot') ? 'inventario::balances' : 'inventario::index', [
@@ -75,14 +84,14 @@ final class OperationsController extends Controller
             'originFilter' => $originFilter, 'originLabels' => OrderOrigin::labels(),
             'showStock' => $withStock && in_array($section, ['overview', 'stock', 'dispatch'], true),
             'showProduction' => $withStock && in_array($section, ['overview', 'production', 'stock'], true),
-            'showOrders' => in_array($section, ['overview', 'orders', 'dispatch', 'authorization'], true),
+            'showOrders' => in_array($section, ['overview', 'orders', 'dispatch'], true),
             'withStock' => $withStock,
             ...$overview, 'permissions' => $permissions, 'customers' => $customers->customers($permissions['clients.manage']),
             ...$orderData,
             'audits' => $permissions['audit.view'] ? $inventory->recentAudit() : [],
             'operationId' => $operationId,
             'pendingProduction' => $pendingProduction,
-            'productionNeeds' => $productionNeeds,
+            'productionNeeds' => $productionNeeds, 'planningUnavailable' => $planningUnavailable,
             'orderForm' => $section === 'orders' && ($permissions['orders.create'] || $permissions['orders.manage']) ? $orderForms->make($request, $operationId) : null,
         ]);
     }
@@ -122,7 +131,7 @@ final class OperationsController extends Controller
     {
         $data = $request->validate(['order_id' => ['required', 'integer', 'exists:business_orders,id'], 'conditions' => ['required', 'string', 'max:10000'], 'billing' => ['boolean'], 'credit' => ['boolean']]);
 
-        return $this->perform(fn () => $customers->authorize($request->user()->id, (int) $data['order_id'], $request->boolean('billing'), $request->boolean('credit'), $data['conditions']), 'Validación administrativa guardada.');
+        return $this->perform(fn () => $customers->authorize($request->user()->id, (int) $data['order_id'], $request->boolean('billing'), $request->boolean('credit'), $data['conditions']), 'Validación administrativa guardada.', route('operations.authorization', ['pedido' => $data['order_id']]));
     }
 
     public function production(Request $request, PrepareInventory $inventory): RedirectResponse
