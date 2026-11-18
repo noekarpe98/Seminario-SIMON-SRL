@@ -64,3 +64,20 @@
 - **Próximo paso:** ninguno de publicación; PR #5 abierta para revisión. Al integrar junto con la PR #4, conservar ambos registros y regenerar el visor resultante.
 - **Evidencia actual:** recuperación selectiva del stash 4bf0ead en un worktree desde origin/main 52030ac; el stash permanece íntegro. Se conciliaron las herramientas 1.8.0 con las acciones actuales del visor y se conservaron todas las reglas Laravel/Filament/Livewire de AGENTS.md. Los scripts y activos instalados coinciden con la copia portable; los tres SKILL.md conservan sus adaptaciones del proyecto y Windows. PDF de colaboración idéntico al guardado (SHA-256 d5ba53fb6ca133aef58d868476fc31c972e348313ef6708c8b68b26b3746d0d4). Suite Python: 92 pruebas, OK con 11 omisiones de enlaces simbólicos en Windows; Node: 11 pruebas aprobadas; sintaxis de los tres activos y git diff --check aprobados. ver-plan.py --help reconoce open/claim/release. Revisión del visor por HTTP local de solo lectura: búsqueda KIT-002, detalle y acciones, cadena de tres tareas, tema oscuro y agrupación por módulo correctos. Sin cambios en src, app, rutas, bases ni dependencias del producto. La exclusión presupuestaria está en la PR #4 y package-lock.json se publica por separado.
   - Publicación verificada el 2026-11-18: rama codex/kit-ai-1-8 subida a personal y PR [#5](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/5) abierta contra main del repositorio principal. Se conserva el stash de respaldo y no se fusiona la PR.
+
+### [EN_CURSO] GIT-006 — Conciliar e integrar la PR del kit con main
+
+- **Capa:** SOLICITADO
+- **Fuente:** solicitud del usuario del 2026-11-18 de solucionar conflictos y hacer merge a main.
+- **Contexto propietario:** coordinación Git y herramientas del plan
+- **Dependencias:** GIT-004
+- **Alcance:** incorporar main a la rama del kit, conservar los cambios presupuestarios y validar la conciliación antes de integrar la PR #5.
+- **Fuera de alcance:** integrar cambios de package-lock sin resolver su falla de instalación.
+- **Invariantes:** conservar los estados EXCLUIDO y la evidencia de RF-013 y LOG-001, las funciones del visor y las reglas del proyecto.
+- **Contratos y archivos previstos:** archivos en conflicto de la PR #5 y visor generado.
+- **Criterios de aceptación:** conflictos resueltos, plan y pruebas pertinentes aprobados y PR #5 integrada o impedimento explícito registrado.
+- **Responsable:** codex-merge-01a1f00b
+- **Fecha de inicio:** 2026-11-18
+- **Última actualización:** 2026-11-18
+- **Próximo paso:** reservar y conciliar con main.
+- **Evidencia actual:** PR #4 integrada; PR #5 presenta conflictos con main y PR #6 permanece en borrador.
