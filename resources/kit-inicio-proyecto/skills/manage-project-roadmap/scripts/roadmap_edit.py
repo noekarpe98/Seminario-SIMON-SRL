@@ -57,8 +57,10 @@ def proposal(monitor, payload: dict) -> dict:
         raise ValueError('Conservá la evidencia histórica; agregá las nuevas verificaciones al final del campo.')
     branch = review_branch(monitor.root)
     source = original['source']
-    path = monitor.plan_dir / source
-    if any(part.is_symlink() for part in (path, *path.parents)) or not path.resolve().is_relative_to(monitor.plan_dir.resolve()):
+    plan_dir = monitor.plan_dir.resolve()
+    path = plan_dir / source
+    if (any(part.is_symlink() for part in (path, *path.parents) if part.is_relative_to(plan_dir))
+            or not path.resolve().is_relative_to(plan_dir)):
         raise ValueError('La fuente debe ser un archivo regular dentro del plan, sin enlaces.')
     before_bytes = path.read_bytes()
     before = before_bytes.decode('utf-8')
@@ -99,7 +101,7 @@ def proposal(monitor, payload: dict) -> dict:
     report = parse_plan(monitor.plan_dir, {source: after})
     if not report['valid']:
         raise ValueError('Plan inválido:\n- ' + '\n- '.join(report['errors']))
-    expected = copy.deepcopy(monitor.graph['tasks'])
+    expected = copy.deepcopy(parse_plan(monitor.plan_dir)['tasks'])
     edited = next(task for task in expected if task['id'] == original['id'])
     edited['title'] = title.strip()
     edited['fields'].update({name: value.strip() for name, value in changes.items()})

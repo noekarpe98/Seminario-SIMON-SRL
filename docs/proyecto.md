@@ -39,3 +39,7 @@ SRS-ACL-2026-11-04 resolvió las reglas del corte actual y pospuso reportes, hoj
 Integrar el prompt maestro, el kit portable, tres skills locales, plantillas, documentación, esquema común, validador, reportes y visor exportable/sincronizado. Conservar las reglas Laravel de `AGENTS.md` y los archivos existentes. La autorización posterior «Ok, implementa» cubre el flujo de altas/despachos: ACC-001 e INV-001 incorporan permisos y operaciones. La deuda en cuenta corriente es independiente de los pares pendientes. Uso inicial local en fábrica; WhatsApp se transcribe manualmente y venta Internet queda futura. Auditoría con retención indefinida, protección SQL y firmas; capa externa inmutable pendiente en SEC-001.
 
 Referencias: [arquitectura](arquitectura/README.md), [decisiones](decisiones/README.md), [plan maestro](plan-maestro/README.md) y [kit reutilizable](../resources/kit-inicio-proyecto/README.md).
+
+## Herramientas de desarrollo actualizadas
+
+Kit-AI 1.8.0 integrado el 2026-11-17 desde cd0fe95e6c5a6b592b7176d7f9c7cf1e492917b2. KIT-002 registra conciliación, reservas locales y revisión del visor. Se conserva el perfil Laravel, src, Simon\ y la etapa implementacion; no se modifica el stack de producto.

@@ -1,0 +1,1525 @@
+{
+  "schema_version": 1,
+  "pilot_2026_11_10": {
+    "kit_commit": "1e2ff97d530d0594c9797c51a9081af7279f8188",
+    "model_configuration": {
+      "model": "gpt-6.1-sol",
+      "model_reasoning_effort": "xhigh"
+    },
+    "go_version": "go version go1.26.5 darwin/arm64",
+    "cli_version": "codex-cli 0.166.0-alpha.6",
+    "method": "Tres ensayos principales en repositorios limpios: kit 1.4.0 / candidato temporal / sin kit. Misma especificación, código inicial y aceptación independiente. Modelo y esfuerzo de usuario sin cambios. Piloto previo conservado por separado; resultados principales no son promedios ni una estimación general de ahorro.",
+    "controls_verified": {
+      "same_initial_product_files": true,
+      "same_prompt": true,
+      "clean_initial_git": true,
+      "independent_acceptance_passed_all": true,
+      "kit_and_candidate_plan_valid_and_done": true
+    },
+    "limits": [
+      "Un caso Go y una ejecución principal por variante; no es una estimación general de ahorro.",
+      "Las métricas de entrada son acumuladas e incluyen caché; se conservan los contadores originales.",
+      "CLI local con la configuración de usuario; no reproduce toda la interfaz de Codex Desktop.",
+      "Los tiempos incluyen decisiones y comandos del agente; excluyen precalentamiento y verificación independiente."
+    ],
+    "runs": [
+      {
+        "condition": "without-kit-clean",
+        "command_executions": 11,
+        "file_change_events": 2,
+        "usage": {
+          "input_tokens": 125296,
+          "cached_input_tokens": 107904,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2636,
+          "reasoning_output_tokens": 862
+        },
+        "first_command_seconds": 5.198,
+        "timeout": false,
+        "errors": [],
+        "first_go_change_seconds": 32.787,
+        "exit_code": 0,
+        "wall_seconds": 50.306,
+        "acceptance_passed": true,
+        "changed_files": [
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "uncached_input_tokens": 17392
+      },
+      {
+        "condition": "with-kit-clean",
+        "command_executions": 19,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 357026,
+          "cached_input_tokens": 307712,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5904,
+          "reasoning_output_tokens": 2515
+        },
+        "first_command_seconds": 6.614,
+        "timeout": false,
+        "errors": [],
+        "first_go_change_seconds": 43.612,
+        "exit_code": 0,
+        "wall_seconds": 101.566,
+        "acceptance_passed": true,
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "uncached_input_tokens": 49314
+      },
+      {
+        "condition": "candidate-clean",
+        "command_executions": 8,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 132286,
+          "cached_input_tokens": 121344,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2726,
+          "reasoning_output_tokens": 856
+        },
+        "first_command_seconds": 5.718,
+        "timeout": false,
+        "errors": [],
+        "first_go_change_seconds": 29.164,
+        "exit_code": 0,
+        "wall_seconds": 51.214,
+        "acceptance_passed": true,
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "uncached_input_tokens": 10942
+      }
+    ]
+  },
+  "release_comparison_2026_11_10": {
+    "date": "2026-11-10",
+    "reference_commit": "1e2ff97d530d0594c9797c51a9081af7279f8188",
+    "versions": {
+      "before": "1.4.0",
+      "after": "1.5.0"
+    },
+    "model_configuration": {
+      "model": "gpt-6.1-sol",
+      "model_reasoning_effort": "xhigh"
+    },
+    "cli_version": "codex-cli 0.166.0-alpha.6",
+    "go_version": "go version go1.26.5 darwin/arm64",
+    "prompt": "Implementá EVAL-001. El plan ya está elaborado y este pedido autoriza la corrección y sus pruebas. Trabajá únicamente en este repositorio temporal; no hagas commits ni push. No hay decisiones de producto pendientes. Informá el resultado y las pruebas ejecutadas.",
+    "method": "Dos ejecuciones de 1.4.0 y dos nuevas de 1.5.0 final, secuenciales y aisladas. El orden inicial fue ABBA; tras detectar una relectura se repitieron las dos variantes finales nuevas. Los controles 1.4.0 se conservaron.",
+    "difference_from_pilot": "El pedido refiere al ID del plan, sin autorizar la relectura del documento original; los criterios completos están en la tarea en ambas versiones.",
+    "summary": {
+      "before": {
+        "runs": 2,
+        "wall_seconds": [
+          84.071,
+          87.867
+        ],
+        "median_wall_seconds": 85.969,
+        "median_first_go_change_seconds": 47.967,
+        "median_commands": 19.0,
+        "median_input_tokens": 263152.5,
+        "median_cached_input_tokens": 240256.0,
+        "median_output_tokens": 4770.5,
+        "original_requirement_read_runs": 2
+      },
+      "after": {
+        "runs": 2,
+        "wall_seconds": [
+          55.562,
+          67.981
+        ],
+        "median_wall_seconds": 61.771499999999996,
+        "median_first_go_change_seconds": 34.807500000000005,
+        "median_commands": 15.0,
+        "median_input_tokens": 157433.5,
+        "median_cached_input_tokens": 145728.0,
+        "median_output_tokens": 3100.5,
+        "original_requirement_read_runs": 0
+      },
+      "observed_median_time_reduction_percent": 28.146773837080808,
+      "observed_median_output_tokens_reduction_percent": 35.006812703070956
+    },
+    "runs": [
+      {
+        "condition": "before-1",
+        "command_executions": 20,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 278417,
+          "cached_input_tokens": 256256,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4561,
+          "reasoning_output_tokens": 1265
+        },
+        "first_command_seconds": 7.66,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'cat .agents/skills/plan-maestro-desarrollo-sistema/SKILL.md .agents/skills/manage-project-roadmap/SKILL.md .agents/skills/arquitectura-hexagonal-ddd/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd; git status --short; rg --files -g 'AGENTS.md' -g 'SKILL.md' -g '*EVAL*' -g 'README.md' -g 'go.mod' -g 'go.work' -g 'Makefile' -g 'Taskfile*' -g 'flujo-de-trabajo.md' -g '\"'!vendor'\"' -g '\"'!node_modules'\"'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat .agents/skills/plan-maestro-desarrollo-sistema/references/flujo-de-trabajo.md .agents/skills/arquitectura-hexagonal-ddd/references/go.md AGENTS.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files --hidden -g '\"'!.git/**'\"' -g '\"'!.agents/skills/**'\"' -g '\"'!.codex/**'\"'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat docs/tarea.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md docs/plan-maestro/README.md docs/plan-maestro/01-carrito.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod .agents/project.json'",
+            "exit_code": 0,
+            "duration_seconds": 0.001
+          },
+          {
+            "command": "/bin/zsh -lc 'cat /Users/wj-004/.agents/skills/security-auditor/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.001
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files --hidden -g 'AGENTS.md' -g '\"'!.git/**'\"' -g '\"'!.codex/**'\"' -g '\"'!node_modules/**'\"' -g '\"'!vendor/**'\"'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task INI-003 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOTOOLCHAIN=local go version'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE=\"$PWD/.tmp/eval-001-go-build\" go test ./...'",
+            "exit_code": 1,
+            "duration_seconds": 4.629
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff -- internal/cart/domain/total.go internal/cart/domain/total_test.go docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOTOOLCHAIN=local GOPROXY=off GOSUMDB=off GOCACHE=\"$PWD/.tmp/eval-001-go-build\" go test ./...'",
+            "exit_code": 0,
+            "duration_seconds": 0.569
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -B -c 'import pathlib, shutil; cache = pathlib.Path(\\\".tmp/eval-001-go-build\\\"); shutil.rmtree(cache); parent = cache.parent; parent.rmdir() if not any(parent.iterdir()) else None'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.078
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -l internal/cart/domain/total.go internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 4.955,
+        "original_requirements_read_events": [
+          "/bin/zsh -lc 'cat docs/tarea.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md docs/plan-maestro/README.md docs/plan-maestro/01-carrito.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod .agents/project.json'"
+        ],
+        "first_go_change_seconds": 46.33,
+        "exit_code": 0,
+        "wall_seconds": 84.071,
+        "acceptance_passed": true,
+        "verification_output": "ok  \texample.com/kitbench/internal/cart/domain\t0.421s\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14
+      },
+      {
+        "condition": "before-2",
+        "command_executions": 18,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 247888,
+          "cached_input_tokens": 224256,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 4980,
+          "reasoning_output_tokens": 1657
+        },
+        "first_command_seconds": 6.629,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g 'SKILL.md' -g '*EVAL*' -g 'README.md' -g 'flujo-de-trabajo.md' -g 'go.mod' -g 'package.json' -g 'Makefile' -g 'pyproject.toml' -g 'pytest.ini' .agents docs internal cmd . 2>/dev/null\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat .agents/skills/plan-maestro-desarrollo-sistema/SKILL.md .agents/skills/manage-project-roadmap/SKILL.md .agents/skills/arquitectura-hexagonal-ddd/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md .agents/skills/plan-maestro-desarrollo-sistema/references/flujo-de-trabajo.md .agents/skills/arquitectura-hexagonal-ddd/references/go.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files -g '\"'!go.sum'\"' -g '\"'!.git/**'\"' -g '\"'!**/.gitkeep'\"' -g '\"'!**/vendor/**'\"' -g '\"'!**/node_modules/**'\"' .\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat /Users/wj-004/.agents/skills/security-auditor/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat docs/tarea.md docs/plan-maestro/01-carrito.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md docs/plan-maestro/README.md docs/fuentes/README.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files --hidden -g 'AGENTS.md' -g '\"'!**/.git/**'\"' -g '\"'!**/node_modules/**'\"' . internal docs && go version\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task INI-003 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOCACHE=\"$PWD/.eval-001-go-cache\" GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local go test ./...'",
+            "exit_code": 1,
+            "duration_seconds": 3.749
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff -- internal/cart/domain/total.go internal/cart/domain/total_test.go docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOCACHE=\"$PWD/.eval-001-go-cache\" GOPROXY=off GOSUMDB=off GOTOOLCHAIN=local go test ./...'",
+            "exit_code": 0,
+            "duration_seconds": 0.526
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git status --short && nl -ba internal/cart/domain/total.go && nl -ba internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -B -c 'import shutil; shutil.rmtree(\\\".eval-001-go-cache\\\")' && git status --short\"",
+            "exit_code": 0,
+            "duration_seconds": 0.064
+          }
+        ],
+        "first_visible_message_seconds": 3.962,
+        "original_requirements_read_events": [
+          "/bin/zsh -lc 'cat docs/tarea.md docs/plan-maestro/01-carrito.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md docs/plan-maestro/README.md docs/fuentes/README.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod'"
+        ],
+        "first_go_change_seconds": 49.604,
+        "exit_code": 0,
+        "wall_seconds": 87.867,
+        "acceptance_passed": true,
+        "verification_output": "ok  \texample.com/kitbench/internal/cart/domain\t0.409s\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14
+      },
+      {
+        "condition": "after-final-1",
+        "command_executions": 14,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 164150,
+          "cached_input_tokens": 151296,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2760,
+          "reasoning_output_tokens": 656
+        },
+        "first_command_seconds": 5.317,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files -g AGENTS.md -g go.mod -g go.work -g '*EVAL*'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat /Users/wj-004/.agents/skills/security-auditor/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'go test ./internal/cart/domain'",
+            "exit_code": 1,
+            "duration_seconds": 0.564
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'go test ./...'",
+            "exit_code": 0,
+            "duration_seconds": 0.612
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff -- internal/cart/domain/total.go internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 3.935,
+        "original_requirements_read_events": [],
+        "first_go_change_seconds": 34.392,
+        "exit_code": 0,
+        "wall_seconds": 55.562,
+        "acceptance_passed": true,
+        "verification_output": "ok  \texample.com/kitbench/internal/cart/domain\t0.413s\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14
+      },
+      {
+        "condition": "after-final-2",
+        "command_executions": 16,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 150717,
+          "cached_input_tokens": 140160,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3441,
+          "reasoning_output_tokens": 1208
+        },
+        "first_command_seconds": 6.06,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files -g AGENTS.md -g go.mod -g '*eval*' -g '*EVAL*'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat go.mod'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"sed -n '1,280p' internal/cart/domain/total_test.go\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"sed -n '1,240p' internal/cart/domain/total.go\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"sed -n '1,220p' docs/plan-maestro/01-carrito.md\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total_test.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOCACHE=/private/tmp/kit-eval-001-go-cache go test ./...'",
+            "exit_code": 1,
+            "duration_seconds": 3.851
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total.go'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'GOCACHE=/private/tmp/kit-eval-001-go-cache go test ./...'",
+            "exit_code": 0,
+            "duration_seconds": 0.552
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff -- internal/cart/domain/total.go internal/cart/domain/total_test.go docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 4.599,
+        "original_requirements_read_events": [],
+        "first_go_change_seconds": 35.223,
+        "exit_code": 0,
+        "wall_seconds": 67.981,
+        "acceptance_passed": true,
+        "verification_output": "ok  \texample.com/kitbench/internal/cart/domain\t0.413s\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14
+      }
+    ],
+    "intermediate_runs": [
+      {
+        "condition": "after-1",
+        "command_executions": 8,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 136053,
+          "cached_input_tokens": 124288,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 2926,
+          "reasoning_output_tokens": 705
+        },
+        "first_command_seconds": 5.946,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc \"pwd && rg --files -g AGENTS.md -g go.mod -g '*eval*' -g '*EVAL*' -g '\"'!vendor'\"' -g '\"'!node_modules'\"' && git status --short\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat internal/cart/domain/total.go internal/cart/domain/total_test.go docs/plan-maestro/01-carrito.md docs/plan-maestro/00-preparacion.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md && rg --files internal docs/plan-maestro && cat go.mod'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total_test.go && go test ./...'",
+            "exit_code": 1,
+            "duration_seconds": 0.576
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total.go internal/cart/domain/total_test.go && go test ./...'",
+            "exit_code": 0,
+            "duration_seconds": 0.57
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git diff && git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 4.126,
+        "original_requirements_read_events": [],
+        "first_go_change_seconds": 28.001,
+        "exit_code": 0,
+        "wall_seconds": 54.634,
+        "acceptance_passed": true,
+        "verification_output": "ok  \texample.com/kitbench/internal/cart/domain\t0.420s\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14
+      },
+      {
+        "condition": "after-2",
+        "command_executions": 9,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 190250,
+          "cached_input_tokens": 177664,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3172,
+          "reasoning_output_tokens": 930
+        },
+        "first_command_seconds": 7.935,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc \"pwd && git status --short && rg --files -g 'AGENTS.md' -g '\"'!vendor'\"' -g '\"'!node_modules'\"' -g '\"'!'\"\\\\.git'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md docs/tarea.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat docs/plan-maestro/01-carrito.md docs/plan-maestro/00-preparacion.md && rg --files internal cmd docs .agents/skills/manage-project-roadmap/scripts'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total_test.go && GOCACHE=\"$PWD/.cache/go-build\" GOPROXY=off GOSUMDB=off go test ./...'",
+            "exit_code": 1,
+            "duration_seconds": 3.871
+          },
+          {
+            "command": "/bin/zsh -lc 'gofmt -w internal/cart/domain/total.go && GOCACHE=\"$PWD/.cache/go-build\" GOPROXY=off GOSUMDB=off go test ./...'",
+            "exit_code": 0,
+            "duration_seconds": 0.551
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git diff -- internal/cart/domain/total.go internal/cart/domain/total_test.go docs/plan-maestro/01-carrito.md && git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -B -c 'from pathlib import Path; import shutil; cache = Path(\\\".cache/go-build\\\"); shutil.rmtree(cache); parent = cache.parent; parent.rmdir() if not any(parent.iterdir()) else None' && git status --short\"",
+            "exit_code": 0,
+            "duration_seconds": 0.098
+          }
+        ],
+        "first_visible_message_seconds": 6.04,
+        "original_requirements_read_events": [
+          "/bin/zsh -lc 'cat AGENTS.md docs/tarea.md internal/cart/domain/total.go internal/cart/domain/total_test.go go.mod'"
+        ],
+        "first_go_change_seconds": 35.099,
+        "exit_code": 0,
+        "wall_seconds": 61.186,
+        "acceptance_passed": true,
+        "verification_output": "ok  \texample.com/kitbench/internal/cart/domain\t0.415s\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "internal/cart/domain/total.go",
+          "internal/cart/domain/total_test.go"
+        ],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14
+      }
+    ],
+    "iteration": "La revisión inicial mejoró el tiempo pero releyó el original en 1 de 2 ejecuciones; se reforzó la prohibición al inicio de AGENTS.md y en readingPolicy de task, y se repite la versión final en dos copias nuevas.",
+    "fixture_files": {
+      "go.mod": "module example.com/kitbench\n\ngo 1.21\n",
+      "internal/cart/domain/total.go": "package cart\n\nimport \"errors\"\n\nvar ErrInvalidLine = errors.New(\"invalid cart line\")\n\ntype Line struct {\n    UnitPriceCents int64\n    Quantity int64\n}\n\nfunc Total(lines []Line) (int64, error) {\n    var total int64\n    for _, line := range lines {\n        if line.UnitPriceCents < 0 || line.Quantity < 0 {\n            return 0, ErrInvalidLine\n        }\n        total += line.UnitPriceCents * line.Quantity\n    }\n    return total, nil\n}\n",
+      "internal/cart/domain/total_test.go": "package cart\n\nimport (\n    \"errors\"\n    \"testing\"\n)\n\nfunc TestTotal(t *testing.T) {\n    total, err := Total([]Line{{UnitPriceCents: 199, Quantity: 2}, {UnitPriceCents: 50, Quantity: 1}})\n    if err != nil || total != 448 { t.Fatalf(\"total=%d err=%v\", total, err) }\n}\n\nfunc TestRejectsNegativeValues(t *testing.T) {\n    for _, line := range []Line{{UnitPriceCents: -1, Quantity: 1}, {UnitPriceCents: 10, Quantity: -1}} {\n        if _, err := Total([]Line{line}); !errors.Is(err, ErrInvalidLine) { t.Fatalf(\"line=%+v err=%v\", line, err) }\n    }\n}\n",
+      "docs/tarea.md": "# EVAL-001 — Rechazar cantidades cero en el carrito\n\nEl cálculo de total acepta una línea con cantidad cero. Corregir esa validación en el contexto cart sin cambiar la API pública.\n\nCriterios de aceptación:\n- Cada línea exige Quantity > 0 y UnitPriceCents >= 0. Un precio cero es válido.\n- Una línea inválida devuelve total 0 y ErrInvalidLine, incluso si aparece después de una línea válida.\n- Un carrito vacío devuelve 0, nil; los totales de líneas válidas se conservan.\n- Agregar pruebas de regresión que cubran cantidad cero, precio cero y carrito vacío, conservando las pruebas existentes.\n\nStack confirmado: Go, biblioteca estándar, un módulo; sin red, servicios ni dependencias externas. La arquitectura existente se conserva. Alcance excluido: overflow, descuentos y funcionalidades adicionales.\n\n<!-- source-id: cart-requirements-001 -->\n",
+      "docs/proyecto.md": "# Carrito de prueba\n\nStack confirmado: Go y biblioteca estándar. Código en internal/cart/domain. Ejecución y pruebas locales con go test ./... . Sin frameworks, base de datos o integraciones. Alcance: docs/tarea.md.\n",
+      "docs/fuentes/README.md": "# Fuentes\n\nConsulta respondida el 2026-11-10: se usa docs/tarea.md y el código del fixture. No hay fuentes externas ni preguntas pendientes.\n",
+      "docs/arquitectura/README.md": "# Arquitectura\n\nContexto propietario: cart. Dominio en internal/cart/domain; cálculo y validación en Total. Sin frameworks ni adaptadores en este núcleo. Los errores públicos y los contratos existentes se conservan. No hay integraciones ni persistencia. El stack y el requisito EVAL-001 están confirmados en docs/tarea.md.\n",
+      "docs/plan-maestro/00-preparacion.md": "### [HECHO] INI-001 — Fuentes y stack confirmados\n\n- **Capa:** SOLICITADO\n- **Fuente:** Preparación del ensayo autorizada el 2026-11-10\n- **Contexto propietario:** Contexto de prueba\n- **Dependencias:** ninguna\n- **Alcance:** Comportamiento incluido\n- **Fuera de alcance:** Ningún dato real\n- **Invariantes:** Regla comprobable\n- **Contratos y archivos previstos:** Interfaz de prueba\n- **Criterios de aceptación:** El resultado puede observarse y verificarse\n- **Responsable:** Agente de prueba\n- **Fecha de inicio:** 2026-11-10\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Comprobar resultado\n- **Evidencia actual:** Fixture y documentos preparados; stack y alcance confirmados en docs/tarea.md.\n\n### [HECHO] INI-002 — Arquitectura existente documentada\n\n- **Capa:** SOLICITADO\n- **Fuente:** Preparación del ensayo autorizada el 2026-11-10\n- **Contexto propietario:** Contexto de prueba\n- **Dependencias:** INI-001\n- **Alcance:** Comportamiento incluido\n- **Fuera de alcance:** Ningún dato real\n- **Invariantes:** Regla comprobable\n- **Contratos y archivos previstos:** Interfaz de prueba\n- **Criterios de aceptación:** El resultado puede observarse y verificarse\n- **Responsable:** Agente de prueba\n- **Fecha de inicio:** 2026-11-10\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Comprobar resultado\n- **Evidencia actual:** Fixture y documentos preparados; stack y alcance confirmados en docs/tarea.md.\n\n### [HECHO] INI-003 — Plan de EVAL-001 preparado\n\n- **Capa:** SOLICITADO\n- **Fuente:** Preparación del ensayo autorizada el 2026-11-10\n- **Contexto propietario:** Contexto de prueba\n- **Dependencias:** INI-002\n- **Alcance:** Comportamiento incluido\n- **Fuera de alcance:** Ningún dato real\n- **Invariantes:** Regla comprobable\n- **Contratos y archivos previstos:** Interfaz de prueba\n- **Criterios de aceptación:** El resultado puede observarse y verificarse\n- **Responsable:** Agente de prueba\n- **Fecha de inicio:** 2026-11-10\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Comprobar resultado\n- **Evidencia actual:** Fixture y documentos preparados; stack y alcance confirmados en docs/tarea.md.\n",
+      "docs/plan-maestro/01-carrito.md": "### [PENDIENTE] EVAL-001 — Rechazar cantidades cero en el carrito\n\n- **Capa:** SOLICITADO\n- **Fuente:** relevamiento completado el 2026-11-10; docs/tarea.md (requerimiento original ya analizado)\n- **Contexto propietario:** cart\n- **Dependencias:** INI-003\n- **Alcance:** Corregir la validación de Quantity y cubrir la regresión\n- **Fuera de alcance:** Overflow, descuentos y funcionalidades adicionales\n- **Invariantes:** Quantity > 0; UnitPriceCents >= 0; carrito vacío 0,nil\n- **Contratos y archivos previstos:** internal/cart/domain/total.go, internal/cart/domain/total_test.go\n- **Criterios de aceptación:** Quantity > 0 y UnitPriceCents >= 0; precio cero válido; una línea inválida en cualquier posición devuelve total 0 y ErrInvalidLine; carrito vacío devuelve 0,nil; conservar totales válidos y API pública; agregar regresiones de cantidad cero, precio cero y carrito vacío sin quitar pruebas existentes; go test ./... correcto\n- **Responsable:** sin asignar\n- **Fecha de inicio:** pendiente\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Leer docs/tarea.md y localizar la validación\n- **Evidencia actual:** No iniciado; datos de prueba\n"
+    },
+    "initial_shared_sha256": {
+      "go.mod": "c2f826fdc8fb44b5499f405df8dce4f76ee1c47ce858c9b2a602201258b75602",
+      "internal/cart/domain/total.go": "d0396b3507f494f11061deda578e22ae52250c6a7aafa9f98bb271be1c574c72",
+      "internal/cart/domain/total_test.go": "3066d1a4cb451aaedc6b5b6f3b06c5e05f419d7e44628a579eee1d103f7b22c2",
+      "docs/tarea.md": "2497cf6c2a7dd67d06a78d2c20463e5492600b0aac7a159578f3b962be6cb11a",
+      "docs/proyecto.md": "d99b60b89c1c997ea2ba5b2ad43874da9b09c9e32c4b2e5ae110a429001eb2fa",
+      "docs/fuentes/README.md": "27e06b55954bcc62a5419d88d4c5755761b3ee22209f93ef37c6317a0cb19c25",
+      "docs/arquitectura/README.md": "0cb003257ebe142257cad0cb5e2c6a8648a5ae47ae20b0f19e332942b864ad22",
+      "docs/plan-maestro/00-preparacion.md": "c614163ce064cbbb59bda84f89db5b2925142bd17141f7fa7b24ef238e85f555",
+      "docs/plan-maestro/01-carrito.md": "0345974aaf5575d80f8f8219c27676367c68fb8a1782c30a506e831d9116647f"
+    },
+    "optimized_instruction_sha256": {
+      "skills/arquitectura-hexagonal-ddd/SKILL.md": "3502087764894f1f247547eacb94a9f7475ed5f8e2a2afe32a767e12aff7a649",
+      "skills/arquitectura-hexagonal-ddd/agents/openai.yaml": "7ae8784e54ae2d73941bd980413a2ca34d207e076c0a93d74989666e43bc1fbb",
+      "skills/arquitectura-hexagonal-ddd/references/diseno-y-modelado.md": "2df37a609dac4f51842f913b2a1cf78fb5f607a2d32496c1a36431503c3432ee",
+      "skills/arquitectura-hexagonal-ddd/references/flutter.md": "340e592eafaf1511f78f0629ae45294dfa8e0c2d202de88248e081e872ed6ec5",
+      "skills/arquitectura-hexagonal-ddd/references/go.md": "fc5424b0a842380764d0edef8dc518ac7b5a1c03c7603804670de967f284e8e8",
+      "skills/arquitectura-hexagonal-ddd/references/laravel.md": "d2deb4797af32329edf1bb8e036d7e89f53d5a2e9088dc1308158b555b119a28",
+      "skills/manage-project-roadmap/SKILL.md": "41768c21a4608d3e53de35bd5bf595b38028ba01ec3c67f2b05bdb7de624a7c5",
+      "skills/manage-project-roadmap/agents/openai.yaml": "89d43488cacae710f67c2dc967dea7b850d787de1e20268459620a81428c278d",
+      "skills/manage-project-roadmap/assets/roadmap-tree.css": "43438452849a6135ed3e1c0e9752c848e5b63335fe0409c7c115a42a10fcfac1",
+      "skills/manage-project-roadmap/assets/roadmap-tree.html": "2b1ffca3175007abc0b8161350fa37ca803c1e5444ba4ccbb2a1d720cb78d155",
+      "skills/manage-project-roadmap/assets/roadmap-tree.js": "3c9a16a031ccbcc6cd5b632142606f2069120e0c92e8961625c66e145645f48d",
+      "skills/manage-project-roadmap/references/herramientas.md": "44203b5911967827d2c97c9a3d3f2c8a10cdcde466b89f1057e0f65597ece058",
+      "skills/manage-project-roadmap/scripts/plan_model.py": "522f65abe721abf129356e538786c3c5b66a18be4503a007a257103ad184a1f6",
+      "skills/manage-project-roadmap/scripts/roadmap.py": "1ed721eb054a468455ed908f4a16a21368ee87ba3f07927f3decfeac06ad989b",
+      "skills/manage-project-roadmap/scripts/roadmap_server.py": "5791267ca64f2a7598d712db7d70d6c063d76701bbd47e70d33d2d8bed09b766",
+      "skills/plan-maestro-desarrollo-sistema/SKILL.md": "67567d584023138a91be70c3481933fcd3d186209aa6de9057010ec240d65033",
+      "skills/plan-maestro-desarrollo-sistema/agents/openai.yaml": "e0200951b1e5db5b4e4333eb8265755a1aac3ee9d0cea219aab029c4bf2f1ff7",
+      "skills/plan-maestro-desarrollo-sistema/references/flujo-de-trabajo.md": "d7c50764e7ab8f6c4d69490a5c5c011cecc2f5fa63530b6c320d0ffb89e00bbb",
+      "skills/plan-maestro-desarrollo-sistema/references/plan-schema.json": "2835f0c7374daf96dff0e577d5c5accf470e33b45e99fc6ada28a0d61aed4689",
+      "skills/plan-maestro-desarrollo-sistema/references/plan-schema.md": "16bb61317917a101db07a07153c60f97a236c2ec90c4141ff6a7edfdcb9265f4"
+    },
+    "optimized_agents_template_sha256": "2a0f327fa4b8093d74301d0d4df8bc7df6d41ffcab5520db204c27f523be8158",
+    "controls_verified": {
+      "same_initial_product_files_and_task": true,
+      "same_prompt": true,
+      "initial_git_clean": true,
+      "independent_acceptance_passed_all_primary": true,
+      "valid_done_tasks_with_14_fields_all_primary": true,
+      "no_original_requirement_reads_observed_in_final_runs": true
+    },
+    "metric_definitions": {
+      "wall_seconds": "Desde iniciar Codex CLI hasta su salida; excluye precalentamiento Go y verificación independiente.",
+      "first_go_change_seconds": "Primer evento de modificación de un archivo Go, incluidas pruebas.",
+      "input_tokens": "Contador acumulado de Codex, incluida caché; no son palabras ni texto único.",
+      "original_requirement_reads": "Lecturas observadas por ruta explícita o por el identificador impreso del documento original; se conservan los comandos."
+    },
+    "limits": [
+      "Un fixture Go de corrección pequeña, n=2 por versión final; no representa todos los proyectos ni modelos.",
+      "Caché y decisiones del modelo varían; no es una estimación de precios ni una garantía de latencia.",
+      "Los ensayos finales nuevos se ejecutaron después de corregir la relectura; no son una nueva secuencia ABBA completa.",
+      "CLI local; no mide toda la interfaz de Codex Desktop. CRUD, permisos y proyectos grandes requieren evaluación adicional."
+    ]
+  },
+  "laravel_comparison_2026_11_10": {
+    "date": "2026-11-10",
+    "versions": {
+      "before": {
+        "version": "1.4.0",
+        "commit": "1e2ff97d530d0594c9797c51a9081af7279f8188"
+      },
+      "after": {
+        "version": "1.5.0",
+        "commit": "f2e8c0ea3cded3fe40eeac64979f0e86bf77d3c7"
+      }
+    },
+    "environment": {
+      "php": "8.4.11",
+      "laravel": "v12.72.0",
+      "phpunit": "11.5.57",
+      "composer_lock_sha256": "dfc67ce61b25e9564a74758602284fa26e9bb3b35b513c995466b5169be811a8"
+    },
+    "model_configuration": {
+      "model": "gpt-6.1-sol",
+      "model_reasoning_effort": "xhigh"
+    },
+    "cli_version": "codex-cli 0.166.0-alpha.6",
+    "laravel_skeleton": "v12.12.2",
+    "composer_version": "2.8.11",
+    "prompt": "Implementá EVAL-001. El plan ya está elaborado y este pedido autoriza la corrección y sus pruebas. Las dependencias están instaladas; no agregues ni actualices dependencias. Trabajá únicamente en este repositorio temporal; no hagas commits ni push. No hay decisiones de producto pendientes. Informá el resultado y las pruebas ejecutadas.",
+    "method": "A/B secuencial ABBA, dos ejecuciones por versión publicada, mismo proyecto Laravel real, dependencias y composer.lock idénticos, misma tarea y aceptación independiente. Git inicial limpio. No se modifican las instrucciones durante el ensayo.",
+    "summary": {
+      "before": {
+        "runs": 2,
+        "wall_seconds": [
+          96.81,
+          104.622
+        ],
+        "median_wall_seconds": 100.71600000000001,
+        "median_first_php_change_seconds": 55.979,
+        "median_commands": 15.0,
+        "median_input_tokens": 270649.5,
+        "median_cached_input_tokens": 244672.0,
+        "median_uncached_input_tokens": 25977.5,
+        "median_output_tokens": 5811.0,
+        "original_requirement_read_runs": 1,
+        "full_suite_test_cases": [
+          34,
+          31
+        ]
+      },
+      "after": {
+        "runs": 2,
+        "wall_seconds": [
+          64.356,
+          64.165
+        ],
+        "median_wall_seconds": 64.26050000000001,
+        "median_first_php_change_seconds": 39.858000000000004,
+        "median_commands": 10.5,
+        "median_input_tokens": 170577.5,
+        "median_cached_input_tokens": 153344.0,
+        "median_uncached_input_tokens": 17233.5,
+        "median_output_tokens": 3551.5,
+        "original_requirement_read_runs": 0,
+        "full_suite_test_cases": [
+          32,
+          32
+        ]
+      },
+      "observed_time_reduction_percent": 36.19633424679296,
+      "observed_input_token_reduction_percent": 36.97475886709564,
+      "observed_output_token_reduction_percent": 38.883152641541905
+    },
+    "runs": [
+      {
+        "condition": "before-1",
+        "command_executions": 13,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 227105,
+          "cached_input_tokens": 202112,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5645,
+          "reasoning_output_tokens": 1325
+        },
+        "first_command_seconds": 7.928,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'cat .agents/skills/plan-maestro-desarrollo-sistema/SKILL.md .agents/skills/arquitectura-hexagonal-ddd/SKILL.md .agents/skills/manage-project-roadmap/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd && git status --short && rg --files -g 'AGENTS.md' -g 'SKILL.md' -g '*EVAL*' -g '*flujo-de-trabajo*' -g 'composer.json' -g 'package.json' -g 'README.md' .agents docs . 2>/dev/null\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md .agents/skills/plan-maestro-desarrollo-sistema/references/flujo-de-trabajo.md .agents/skills/arquitectura-hexagonal-ddd/references/laravel.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files -g '\"'!vendor/**'\"' -g '\"'!node_modules/**'\"' -g '\"'!package-lock.json'\"' -g '\"'!composer.lock'\"' -g '\"'!public/build/**'\"' -g '\"'!storage/**'\"' -g '\"'!bootstrap/cache/**'\"' -g '\"'!docs/plan-maestro/tasks.json'\"' && cat composer.json package.json .agents/project.json docs/fuentes/README.md docs/plan-maestro/README.md\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat docs/plan-maestro/01-carrito.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md src/Cart/Domain/CartLine.php src/Cart/Domain/InvalidCartLine.php src/Cart/Domain/CartTotal.php src/Cart/Application/CalculateCartTotal.php src/Cart/UI/Http/CartTotalController.php tests/Unit/CartTotalTest.php tests/Feature/CartTotalEndpointTest.php tests/TestCase.php routes/web.php bootstrap/app.php phpunit.xml'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task INI-003 --format context && rg --files --hidden -g 'AGENTS.md' -g '\"'!vendor/**'\"' -g '\"'!node_modules/**'\"' -g '\"'!.git/**'\"' && rg -n '\\\"name\\\": \\\"(laravel/framework|phpunit/phpunit)\\\"|\\\"version\\\"' composer.lock | head -60\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 0,
+            "duration_seconds": 0.376
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 1,
+            "duration_seconds": 0.546
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git diff -- src/Cart/Domain/CartLine.php src/Cart/UI/Http/CartTotalController.php tests/Unit/CartTotalTest.php tests/Feature/CartTotalEndpointTest.php'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 0,
+            "duration_seconds": 0.457
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git status --short && git diff --stat && git diff --exit-code -- composer.json composer.lock package.json package-lock.json'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 5.342,
+        "original_requirements_read_events": [],
+        "first_php_change_seconds": 53.579,
+        "exit_code": 0,
+        "wall_seconds": 96.81,
+        "independent_acceptance_cases": 13,
+        "independent_acceptance_failures": [],
+        "full_suite_test_cases": 34,
+        "acceptance_passed": true,
+        "verification_output": "\n  ..................................\n\n  Tests:    34 passed (83 assertions)\n  Duration: 0.34s\n\n",
+        "changed_files": [
+          "docs/evidencia/EVAL-001-2026-11-10.md",
+          "docs/plan-maestro/01-carrito.md",
+          "src/Cart/Domain/CartLine.php",
+          "src/Cart/UI/Http/CartTotalController.php",
+          "tests/Feature/CartTotalEndpointTest.php",
+          "tests/Unit/CartTotalTest.php"
+        ],
+        "composer_lock_unchanged": true,
+        "existing_test_methods_preserved": true,
+        "framework_imports_in_core": [],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14,
+        "uncached_input_tokens": 24993
+      },
+      {
+        "condition": "after-1",
+        "command_executions": 10,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 174476,
+          "cached_input_tokens": 159360,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3558,
+          "reasoning_output_tokens": 1027
+        },
+        "first_command_seconds": 5.966,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g '\"'!vendor'\"' -g '\"'!node_modules'\"' -g '\"'!sources/**'\"' -g '\"'!fuentes/**'\"' && git status --short\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat src/Cart/Domain/CartLine.php src/Cart/UI/Http/CartTotalController.php && cat docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md && rg --files src/Cart tests && cat composer.json && cat phpunit.xml'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat src/Cart/Application/CalculateCartTotal.php src/Cart/Domain/CartTotal.php src/Cart/Domain/InvalidCartLine.php tests/Unit/CartTotalTest.php tests/Feature/CartTotalEndpointTest.php tests/TestCase.php routes/api.php'",
+            "exit_code": 1,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 1,
+            "duration_seconds": 0.517
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 0,
+            "duration_seconds": 0.45
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git diff -- src/Cart tests'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git status --short && git diff --stat'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 4.452,
+        "original_requirements_read_events": [],
+        "first_php_change_seconds": 40.129,
+        "exit_code": 0,
+        "wall_seconds": 64.356,
+        "independent_acceptance_cases": 13,
+        "independent_acceptance_failures": [],
+        "full_suite_test_cases": 32,
+        "acceptance_passed": true,
+        "verification_output": "\n  ................................\n\n  Tests:    32 passed (68 assertions)\n  Duration: 0.33s\n\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "src/Cart/Domain/CartLine.php",
+          "src/Cart/UI/Http/CartTotalController.php",
+          "tests/Feature/CartTotalEndpointTest.php",
+          "tests/Unit/CartTotalTest.php"
+        ],
+        "composer_lock_unchanged": true,
+        "existing_test_methods_preserved": true,
+        "framework_imports_in_core": [],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14,
+        "uncached_input_tokens": 15116
+      },
+      {
+        "condition": "after-2",
+        "command_executions": 11,
+        "file_change_events": 3,
+        "usage": {
+          "input_tokens": 166679,
+          "cached_input_tokens": 147328,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 3545,
+          "reasoning_output_tokens": 1004
+        },
+        "first_command_seconds": 5.84,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g '\"'!vendor'\"' -g '\"'!node_modules'\"' -g '\"'!storage'\"' -g '\"'!bootstrap/cache'\"' && git status --short\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat src/Cart/Domain/CartLine.php src/Cart/UI/Http/CartTotalController.php composer.json phpunit.xml docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'rg --files src tests routes bootstrap | sort'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat src/Cart/Application/CalculateCartTotal.php src/Cart/Domain/CartTotal.php src/Cart/Domain/InvalidCartLine.php tests/Unit/CartTotalTest.php tests/Feature/CartTotalEndpointTest.php tests/TestCase.php routes/web.php bootstrap/app.php'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --porcelain=v1 && php --version'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 1,
+            "duration_seconds": 0.557
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 0,
+            "duration_seconds": 0.473
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff --stat && git diff && git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 3.938,
+        "original_requirements_read_events": [],
+        "first_php_change_seconds": 39.587,
+        "exit_code": 0,
+        "wall_seconds": 64.165,
+        "independent_acceptance_cases": 13,
+        "independent_acceptance_failures": [],
+        "full_suite_test_cases": 32,
+        "acceptance_passed": true,
+        "verification_output": "\n  ................................\n\n  Tests:    32 passed (106 assertions)\n  Duration: 0.34s\n\n",
+        "changed_files": [
+          "docs/plan-maestro/01-carrito.md",
+          "src/Cart/Domain/CartLine.php",
+          "src/Cart/UI/Http/CartTotalController.php",
+          "tests/Feature/CartTotalEndpointTest.php",
+          "tests/Unit/CalculateCartTotalTest.php",
+          "tests/Unit/CartTotalTest.php"
+        ],
+        "composer_lock_unchanged": true,
+        "existing_test_methods_preserved": true,
+        "framework_imports_in_core": [],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14,
+        "uncached_input_tokens": 19351
+      },
+      {
+        "condition": "before-2",
+        "command_executions": 17,
+        "file_change_events": 5,
+        "usage": {
+          "input_tokens": 314194,
+          "cached_input_tokens": 287232,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 5977,
+          "reasoning_output_tokens": 1375
+        },
+        "first_command_seconds": 7.037,
+        "timeout": false,
+        "errors": [],
+        "commands": [
+          {
+            "command": "/bin/zsh -lc 'cat .agents/skills/plan-maestro-desarrollo-sistema/SKILL.md .agents/skills/arquitectura-hexagonal-ddd/SKILL.md .agents/skills/manage-project-roadmap/SKILL.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"pwd && rg --files -g 'AGENTS.md' -g 'SKILL.md' -g 'composer.json' -g 'package.json' -g '*EVAL*' -g 'README.md' -g 'flujo-de-trabajo.md' -g '*fuentes*' .agents docs . 2>/dev/null\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git status --short'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat AGENTS.md .agents/skills/plan-maestro-desarrollo-sistema/references/flujo-de-trabajo.md .agents/skills/arquitectura-hexagonal-ddd/references/laravel.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files -g '\"'!vendor/**'\"' -g '\"'!node_modules/**'\"' -g '\"'!.git/**'\"' -g '\"'!storage/**'\"' -g '\"'!bootstrap/cache/**'\"' -g '\"'!public/build/**'\"' -g '\"'!composer.lock'\"' -g '\"'!package-lock.json'\"' -g '\"'!pnpm-lock.yaml'\"'\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task EVAL-001 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat src/Cart/Domain/CartLine.php src/Cart/Domain/InvalidCartLine.php src/Cart/Domain/CartTotal.php src/Cart/Application/CalculateCartTotal.php src/Cart/UI/Http/CartTotalController.php tests/Unit/CartTotalTest.php tests/Feature/CartTotalEndpointTest.php tests/TestCase.php bootstrap/app.php routes/web.php'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'cat docs/plan-maestro/01-carrito.md docs/plan-maestro/README.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md docs/tarea.md composer.json package.json phpunit.xml'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc \"rg --files --hidden -g AGENTS.md -g '\"'!vendor/**'\"' -g '\"'!node_modules/**'\"' -g '\"'!.git/**'\"'; rg -n '\\\"name\\\": \\\"(laravel/framework|phpunit/phpunit)\\\"|\\\"version\\\"' composer.lock | head -n 65; cat /Users/wj-004/.agents/skills/security-auditor/SKILL.md\"",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task INI-003 --format context'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 0,
+            "duration_seconds": 0.436
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 1,
+            "duration_seconds": 0.626
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git diff -- src/Cart/Domain/CartLine.php src/Cart/UI/Http/CartTotalController.php tests/Unit/CartTotalTest.php tests/Feature/CartTotalEndpointTest.php docs/plan-maestro/01-carrito.md'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'php artisan test'",
+            "exit_code": 0,
+            "duration_seconds": 0.469
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check && git status --short && git diff --stat && git diff --exit-code -- composer.json composer.lock package.json package-lock.json'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'python3 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          },
+          {
+            "command": "/bin/zsh -lc 'git diff --check'",
+            "exit_code": 0,
+            "duration_seconds": 0.0
+          }
+        ],
+        "first_visible_message_seconds": 4.124,
+        "original_requirements_read_events": [
+          "/bin/zsh -lc 'cat docs/plan-maestro/01-carrito.md docs/plan-maestro/README.md docs/proyecto.md docs/arquitectura/README.md docs/decisiones/README.md docs/tarea.md composer.json package.json phpunit.xml'"
+        ],
+        "first_php_change_seconds": 58.379,
+        "exit_code": 0,
+        "wall_seconds": 104.622,
+        "independent_acceptance_cases": 13,
+        "independent_acceptance_failures": [],
+        "full_suite_test_cases": 31,
+        "acceptance_passed": true,
+        "verification_output": "\n  ...............................\n\n  Tests:    31 passed (67 assertions)\n  Duration: 0.32s\n\n",
+        "changed_files": [
+          "docs/evidencia/EVAL-001-2026-11-10.md",
+          "docs/plan-maestro/01-carrito.md",
+          "src/Cart/Domain/CartLine.php",
+          "src/Cart/UI/Http/CartTotalController.php",
+          "tests/Feature/CartTotalEndpointTest.php",
+          "tests/Unit/CartTotalTest.php"
+        ],
+        "composer_lock_unchanged": true,
+        "existing_test_methods_preserved": true,
+        "framework_imports_in_core": [],
+        "plan_valid": true,
+        "task_status": "HECHO",
+        "task_field_count": 14,
+        "uncached_input_tokens": 26962
+      }
+    ],
+    "fixture_files": {
+      "src/Cart/Domain/InvalidCartLine.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace KitBench\\Cart\\Domain;\n\nfinal class InvalidCartLine extends \\DomainException {}\n",
+      "src/Cart/Domain/CartLine.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace KitBench\\Cart\\Domain;\n\nfinal readonly class CartLine\n{\n    public function __construct(\n        public int $unitPriceCents,\n        public int $quantity,\n    ) {\n        if ($unitPriceCents < 0 || $quantity < 0) {\n            throw new InvalidCartLine('Invalid cart line.');\n        }\n    }\n}\n",
+      "src/Cart/Domain/CartTotal.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace KitBench\\Cart\\Domain;\n\nfinal class CartTotal\n{\n    /** @param list<CartLine> $lines */\n    public function calculate(array $lines): int\n    {\n        $total = 0;\n        foreach ($lines as $line) {\n            $total += $line->unitPriceCents * $line->quantity;\n        }\n        return $total;\n    }\n}\n",
+      "src/Cart/Application/CalculateCartTotal.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace KitBench\\Cart\\Application;\n\nuse KitBench\\Cart\\Domain\\CartLine;\nuse KitBench\\Cart\\Domain\\CartTotal;\n\nfinal readonly class CalculateCartTotal\n{\n    public function __construct(private CartTotal $total) {}\n\n    /** @param list<array{unit_price_cents: int, quantity: int}> $lines */\n    public function __invoke(array $lines): int\n    {\n        $cartLines = array_map(\n            static fn (array $line): CartLine => new CartLine($line['unit_price_cents'], $line['quantity']),\n            $lines,\n        );\n        return $this->total->calculate($cartLines);\n    }\n}\n",
+      "src/Cart/UI/Http/CartTotalController.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace KitBench\\Cart\\UI\\Http;\n\nuse Illuminate\\Http\\JsonResponse;\nuse Illuminate\\Http\\Request;\nuse Illuminate\\Validation\\ValidationException;\nuse KitBench\\Cart\\Application\\CalculateCartTotal;\nuse KitBench\\Cart\\Domain\\InvalidCartLine;\n\nfinal class CartTotalController\n{\n    public function __invoke(Request $request, CalculateCartTotal $calculate): JsonResponse\n    {\n        $validated = $request->validate([\n            'lines' => ['present', 'array'],\n            'lines.*.unit_price_cents' => ['required', 'integer', 'min:0'],\n            'lines.*.quantity' => ['required', 'integer', 'min:0'],\n        ]);\n\n        try {\n            $total = $calculate($validated['lines']);\n        } catch (InvalidCartLine $error) {\n            throw ValidationException::withMessages(['lines' => $error->getMessage()]);\n        }\n        return response()->json(['total_cents' => $total]);\n    }\n}\n",
+      "routes/web.php": "<?php\n\nuse Illuminate\\Support\\Facades\\Route;\nuse KitBench\\Cart\\UI\\Http\\CartTotalController;\n\nRoute::post('/api/cart/total', CartTotalController::class);\n",
+      "tests/Unit/CartTotalTest.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace Tests\\Unit;\n\nuse KitBench\\Cart\\Domain\\CartLine;\nuse KitBench\\Cart\\Domain\\CartTotal;\nuse KitBench\\Cart\\Domain\\InvalidCartLine;\nuse PHPUnit\\Framework\\TestCase;\n\nfinal class CartTotalTest extends TestCase\n{\n    public function test_valid_cart_total(): void\n    {\n        self::assertSame(448, (new CartTotal)->calculate([new CartLine(199, 2), new CartLine(50, 1)]));\n    }\n\n    public function test_empty_cart_total(): void\n    {\n        self::assertSame(0, (new CartTotal)->calculate([]));\n    }\n\n    public function test_negative_price_is_invalid(): void\n    {\n        $this->expectException(InvalidCartLine::class);\n        new CartLine(-1, 1);\n    }\n\n    public function test_negative_quantity_is_invalid(): void\n    {\n        $this->expectException(InvalidCartLine::class);\n        new CartLine(100, -1);\n    }\n}\n",
+      "tests/Feature/CartTotalEndpointTest.php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace Tests\\Feature;\n\nuse Tests\\TestCase;\n\nfinal class CartTotalEndpointTest extends TestCase\n{\n    public function test_valid_cart_is_calculated(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 199, 'quantity' => 2],\n            ['unit_price_cents' => 50, 'quantity' => 1],\n        ]])->assertOk()->assertExactJson(['total_cents' => 448]);\n    }\n\n    public function test_negative_quantity_has_a_field_validation_error(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 100, 'quantity' => -1],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.0.quantity');\n    }\n\n    public function test_lines_are_required(): void\n    {\n        $this->postJson('/api/cart/total', [])->assertUnprocessable()->assertJsonValidationErrors('lines');\n    }\n\n    public function test_non_integer_quantity_is_invalid(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 100, 'quantity' => 'invalid'],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.0.quantity');\n    }\n}\n",
+      "docs/tarea.md": "# EVAL-001 — Rechazar cantidad cero en el carrito Laravel\n\nEl endpoint POST /api/cart/total y el objeto de valor CartLine aceptan cantidad cero.\nCorregir ambas validaciones, conservando la API y la arquitectura existente.\n\nCriterios:\n- Quantity debe ser mayor que cero; unit_price_cents debe ser mayor o igual a cero.\n- El precio cero es válido y un carrito vacío devuelve HTTP 200 con total_cents=0.\n- CartLine rechaza cantidad cero con InvalidCartLine, también al invocar el caso de uso directamente.\n- La API devuelve HTTP 422 y un error en lines.N.quantity ante cantidad cero, incluso en la segunda línea.\n- Conservar los totales válidos, errores existentes, firma pública y claves JSON.\n- Agregar pruebas de regresión unitarias y HTTP; conservar las existentes.\n- Ejecutar php artisan test sin acceder a servicios o datos externos.\n\nFuera de alcance: overflow, descuentos, persistencia, autenticación y nuevas dependencias.\n<!-- source-id: laravel-cart-requirements-001 -->\n",
+      "docs/arquitectura/README.md": "# Arquitectura confirmada\n\nContexto Cart. Código propio bajo src/Cart, con Domain, Application y UI/Http.\nCartLine es un objeto de valor inmutable que protege sus invariantes; CartTotal calcula.\nCalculateCartTotal coordina sin imports Laravel. CartTotalController adapta HTTP y validación.\nEl contenedor autoconstruye el caso de uso; no hay persistencia ni integraciones.\nEl relevamiento está cerrado y los criterios completos están en EVAL-001.\n",
+      "README.md": "# Carrito Laravel de prueba\n\nAplicación aislada, con arquitectura por contexto en src/Cart. Dependencias instaladas y fijadas en composer.lock. Pruebas: php artisan test. El relevamiento está cerrado y los criterios completos están en EVAL-001. Sin servicios externos.\n",
+      "docs/plan-maestro/00-preparacion.md": "### [HECHO] INI-001 — Fuentes y stack confirmados\n\n- **Capa:** SOLICITADO\n- **Fuente:** Preparación del ensayo Laravel autorizada el 2026-11-10\n- **Contexto propietario:** Contexto de prueba\n- **Dependencias:** ninguna\n- **Alcance:** Comportamiento incluido\n- **Fuera de alcance:** Ningún dato real\n- **Invariantes:** Regla comprobable\n- **Contratos y archivos previstos:** Interfaz de prueba\n- **Criterios de aceptación:** El resultado puede observarse y verificarse\n- **Responsable:** Agente de prueba\n- **Fecha de inicio:** 2026-11-10\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Comprobar resultado\n- **Evidencia actual:** Entorno Laravel y dependencias instalados; fuentes analizadas y arquitectura existente documentada.\n\n### [HECHO] INI-002 — Arquitectura existente definida\n\n- **Capa:** SOLICITADO\n- **Fuente:** Preparación del ensayo Laravel autorizada el 2026-11-10\n- **Contexto propietario:** Contexto de prueba\n- **Dependencias:** INI-001\n- **Alcance:** Comportamiento incluido\n- **Fuera de alcance:** Ningún dato real\n- **Invariantes:** Regla comprobable\n- **Contratos y archivos previstos:** Interfaz de prueba\n- **Criterios de aceptación:** El resultado puede observarse y verificarse\n- **Responsable:** Agente de prueba\n- **Fecha de inicio:** 2026-11-10\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Comprobar resultado\n- **Evidencia actual:** Entorno Laravel y dependencias instalados; fuentes analizadas y arquitectura existente documentada.\n\n### [HECHO] INI-003 — Plan de EVAL-001 preparado\n\n- **Capa:** SOLICITADO\n- **Fuente:** Preparación del ensayo Laravel autorizada el 2026-11-10\n- **Contexto propietario:** Contexto de prueba\n- **Dependencias:** INI-002\n- **Alcance:** Comportamiento incluido\n- **Fuera de alcance:** Ningún dato real\n- **Invariantes:** Regla comprobable\n- **Contratos y archivos previstos:** Interfaz de prueba\n- **Criterios de aceptación:** El resultado puede observarse y verificarse\n- **Responsable:** Agente de prueba\n- **Fecha de inicio:** 2026-11-10\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Comprobar resultado\n- **Evidencia actual:** Entorno Laravel y dependencias instalados; fuentes analizadas y arquitectura existente documentada.\n",
+      "docs/plan-maestro/01-carrito.md": "### [PENDIENTE] EVAL-001 — Rechazar cantidad cero en carrito Laravel\n\n- **Capa:** SOLICITADO\n- **Fuente:** Relevamiento completado el 2026-11-10; docs/tarea.md (requerimiento original ya analizado)\n- **Contexto propietario:** Cart\n- **Dependencias:** INI-003\n- **Alcance:** Corregir validaciones de cantidad cero en dominio y HTTP con regresiones\n- **Fuera de alcance:** Overflow, descuentos, persistencia, autenticación y nuevas dependencias\n- **Invariantes:** Quantity > 0; unit_price_cents >= 0; núcleo PHP puro; carrito vacío válido\n- **Contratos y archivos previstos:** src/Cart/Domain/CartLine.php, src/Cart/UI/Http/CartTotalController.php, tests/Unit y tests/Feature\n- **Criterios de aceptación:** Quantity > 0 en CartLine; unit_price_cents >= 0 y precio cero válido; caso de uso directo rechaza cantidad cero con InvalidCartLine; POST /api/cart/total devuelve 422 con errors.lines.N.quantity ante cantidad cero en cualquier posición; carrito vacío devuelve 200 con total_cents=0; conservar API, claves JSON y totales válidos; agregar regresiones unitarias y HTTP manteniendo las existentes; php artisan test correcto\n- **Responsable:** sin asignar\n- **Fecha de inicio:** pendiente\n- **Última actualización:** 2026-11-10\n- **Próximo paso:** Usar los criterios del plan y localizar las dos validaciones\n- **Evidencia actual:** No iniciado; datos de prueba\n",
+      "docs/proyecto.md": "# Carrito Laravel de prueba\n\nStack confirmado: Laravel 12.72.0, PHP 8.4.11 y PHPUnit 11.5.57. Composer PSR-4 KitBench hacia src/. Dependencias instaladas; no agregar ni actualizar dependencias. Pruebas con php artisan test. Entorno testing aislado, sin servicios externos ni datos de producción. Relevamiento y plan completos.\n",
+      "docs/fuentes/README.md": "# Fuentes\n\nConsulta respondida el 2026-11-10. Se analizó docs/tarea.md y se trasladaron los criterios completos a EVAL-001. No hay fuentes externas ni decisiones pendientes. El plan está preparado.\n"
+    },
+    "initial_shared_sha256": {
+      "src/Cart/Domain/InvalidCartLine.php": "0770c8656c136382e5350fc87c4c0d03c87512415f957354102532c9c3ef87e9",
+      "src/Cart/Domain/CartLine.php": "b09e29475a7c61b5bec21dc917fd47050787bba06be79d43740c0b4450acd4c9",
+      "src/Cart/Domain/CartTotal.php": "0e37f4d82159b8644a1e3dc7935925c8544d050800fc877f9b20b84b93a9d3a8",
+      "src/Cart/Application/CalculateCartTotal.php": "4c0a472069ca8cc9e49a9234dde32e52b6b754f7552f2e31f0f3888cc4608964",
+      "src/Cart/UI/Http/CartTotalController.php": "cf7862b93afd1dd481f2c7e0b0060f422bbc9876a70acd3c731c99cf17953322",
+      "routes/web.php": "8d19f994e474105a62a2d0179fcd026ebdd400e284cde2bd0b3af8608267fecf",
+      "tests/Unit/CartTotalTest.php": "b7f4b1fb26cd1527e316cabddef851b4ab9d12577d795f483f49e1423fed2c67",
+      "tests/Feature/CartTotalEndpointTest.php": "07e6e0a88c40c02f95568a415e91087ce6b93d21602bf98168c61233f34318d8",
+      "docs/tarea.md": "7ef23328297948602d986cb70f2c100d075c1b302a6579fdd5453bc33a1b52e6",
+      "docs/arquitectura/README.md": "1a938ffca99012273ce77a2a0be82479e2bd45b4de89ae9b07175155d10d46ae",
+      "README.md": "18668ea9c4c1ff5a1e697ba7601edbf89e583408fba0c01decd43f60cd386425",
+      "docs/plan-maestro/00-preparacion.md": "4b900f4e32b5988ff63297ceea18ec773baf13a48d96aeb8b351c8970d01e1cf",
+      "docs/plan-maestro/01-carrito.md": "9d4f0fb2bf3ee3b0b93da7e24711b21b06d41daf0a4fb8a3c694b378bc87f4f7",
+      "docs/proyecto.md": "b167c93364b1c14a95527fe7670c7d9e9428a4358f31917526e0b5a6f2d6592d",
+      "docs/fuentes/README.md": "6459999dfad6d96befbce9e1b70cdfe8d63563ebe8d5df1eae286a0c64662641"
+    },
+    "initial_composer_json_sha256": "4e022f0759fde97b432a2cd54fec894477310c3e2c6586696e4c2348b20d3e4c",
+    "acceptance_php": "<?php\n\ndeclare(strict_types=1);\n\nnamespace Tests\\Feature;\n\nuse KitBench\\Cart\\Application\\CalculateCartTotal;\nuse KitBench\\Cart\\Domain\\CartLine;\nuse KitBench\\Cart\\Domain\\CartTotal;\nuse KitBench\\Cart\\Domain\\InvalidCartLine;\nuse Tests\\TestCase;\n\nfinal class BenchmarkAcceptanceTest extends TestCase\n{\n    public function test_domain_rejects_zero_quantity(): void\n    {\n        $this->expectException(InvalidCartLine::class);\n        new CartLine(100, 0);\n    }\n\n    public function test_domain_accepts_zero_price(): void\n    {\n        self::assertSame(0, (new CartTotal)->calculate([new CartLine(0, 2)]));\n    }\n\n    public function test_use_case_rejects_zero_quantity_in_second_line(): void\n    {\n        $this->expectException(InvalidCartLine::class);\n        (new CalculateCartTotal(new CartTotal))([\n            ['unit_price_cents' => 100, 'quantity' => 2],\n            ['unit_price_cents' => 50, 'quantity' => 0],\n        ]);\n    }\n\n    public function test_api_zero_quantity_has_field_error(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 100, 'quantity' => 0],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.0.quantity');\n    }\n\n    public function test_api_zero_quantity_in_second_line_has_field_error(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 100, 'quantity' => 2],\n            ['unit_price_cents' => 50, 'quantity' => 0],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.1.quantity');\n    }\n\n    public function test_api_empty_cart_returns_zero(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => []])\n            ->assertOk()->assertExactJson(['total_cents' => 0]);\n    }\n\n    public function test_api_zero_price_is_valid(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 0, 'quantity' => 2],\n        ]])->assertOk()->assertExactJson(['total_cents' => 0]);\n    }\n\n    public function test_api_valid_total_is_preserved(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 199, 'quantity' => 2],\n            ['unit_price_cents' => 50, 'quantity' => 1],\n        ]])->assertOk()->assertExactJson(['total_cents' => 448]);\n    }\n\n    public function test_api_negative_quantity_is_invalid(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 100, 'quantity' => -1],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.0.quantity');\n    }\n\n    public function test_api_negative_price_is_invalid(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => -1, 'quantity' => 1],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.0.unit_price_cents');\n    }\n\n    public function test_api_missing_lines_is_invalid(): void\n    {\n        $this->postJson('/api/cart/total', [])\n            ->assertUnprocessable()->assertJsonValidationErrors('lines');\n    }\n\n    public function test_api_non_integer_quantity_is_invalid(): void\n    {\n        $this->postJson('/api/cart/total', ['lines' => [\n            ['unit_price_cents' => 100, 'quantity' => 'invalid'],\n        ]])->assertUnprocessable()->assertJsonValidationErrors('lines.0.quantity');\n    }\n\n    public function test_domain_negative_values_are_invalid(): void\n    {\n        foreach ([[-1, 1], [100, -1]] as [$price, $quantity]) {\n            try {\n                new CartLine($price, $quantity);\n                self::fail('Negative values accepted.');\n            } catch (InvalidCartLine) {\n                self::assertTrue(true);\n            }\n        }\n    }\n}\n",
+    "acceptance_sha256": "e85121ef598e5c285dcef38826eb1ad7ea061543f0706076a7b220e84c741c68",
+    "dependency_versions": {
+      "brick/math": "0.14.8",
+      "carbonphp/carbon-doctrine-types": "3.2.1",
+      "dflydev/dot-access-data": "v3.0.3",
+      "doctrine/inflector": "2.1.1",
+      "doctrine/lexer": "3.0.3",
+      "dragonmantank/cron-expression": "v3.6.1",
+      "egulias/email-validator": "4.0.4",
+      "fruitcake/php-cors": "v1.4.0",
+      "graham-campbell/result-type": "v1.2.0",
+      "guzzlehttp/guzzle": "7.16.1",
+      "guzzlehttp/promises": "2.6.0",
+      "guzzlehttp/psr7": "2.13.2",
+      "guzzlehttp/uri-template": "v1.0.11",
+      "laravel/framework": "v12.72.0",
+      "laravel/prompts": "v0.3.27",
+      "laravel/serializable-closure": "v2.2.0",
+      "laravel/tinker": "v2.11.1",
+      "league/commonmark": "2.10.7",
+      "league/config": "v1.2.0",
+      "league/flysystem": "3.36.0",
+      "league/flysystem-local": "3.35.3",
+      "league/mime-type-detection": "1.17.0",
+      "league/uri": "7.10.0",
+      "league/uri-interfaces": "7.10.0",
+      "monolog/monolog": "3.12.1",
+      "nesbot/carbon": "3.15.1",
+      "nette/schema": "v1.4.0",
+      "nette/utils": "v4.1.6",
+      "nikic/php-parser": "v5.9.0",
+      "nunomaduro/termwind": "v2.4.1",
+      "phpoption/phpoption": "1.10.0",
+      "psr/clock": "1.0.0",
+      "psr/container": "2.0.2",
+      "psr/event-dispatcher": "1.0.0",
+      "psr/http-client": "1.0.3",
+      "psr/http-factory": "1.1.0",
+      "psr/http-message": "2.0",
+      "psr/log": "3.0.2",
+      "psr/simple-cache": "3.0.0",
+      "psy/psysh": "v0.12.24",
+      "ralouphie/getallheaders": "3.0.3",
+      "ramsey/collection": "2.1.1",
+      "ramsey/uuid": "4.9.4",
+      "symfony/clock": "v8.1.9",
+      "symfony/console": "v7.4.23",
+      "symfony/css-selector": "v8.1.10",
+      "symfony/deprecation-contracts": "v3.8.1",
+      "symfony/error-handler": "v7.4.22",
+      "symfony/event-dispatcher": "v8.1.5",
+      "symfony/event-dispatcher-contracts": "v3.8.1",
+      "symfony/finder": "v7.4.23",
+      "symfony/http-foundation": "v7.4.23",
+      "symfony/http-kernel": "v7.4.23",
+      "symfony/mailer": "v7.4.22",
+      "symfony/mime": "v7.4.22",
+      "symfony/polyfill-ctype": "v1.37.0",
+      "symfony/polyfill-intl-grapheme": "v1.43.3",
+      "symfony/polyfill-intl-idn": "v1.43.0",
+      "symfony/polyfill-intl-normalizer": "v1.43.0",
+      "symfony/polyfill-mbstring": "v1.43.3",
+      "symfony/polyfill-php80": "v1.43.0",
+      "symfony/polyfill-php83": "v1.43.0",
+      "symfony/polyfill-php84": "v1.43.0",
+      "symfony/polyfill-php85": "v1.43.0",
+      "symfony/polyfill-time": "v1.42.0",
+      "symfony/polyfill-uuid": "v1.43.0",
+      "symfony/process": "v7.4.22",
+      "symfony/routing": "v7.4.23",
+      "symfony/service-contracts": "v3.8.1",
+      "symfony/string": "v8.1.10",
+      "symfony/translation": "v8.1.11",
+      "symfony/translation-contracts": "v3.8.1",
+      "symfony/uid": "v7.4.21",
+      "symfony/var-dumper": "v7.4.22",
+      "tijsverkoyen/css-to-inline-styles": "v2.4.0",
+      "vlucas/phpdotenv": "v5.8.0",
+      "voku/portable-ascii": "2.1.1",
+      "fakerphp/faker": "v1.24.1",
+      "filp/whoops": "2.19.3",
+      "hamcrest/hamcrest-php": "v3.0.0",
+      "laravel/pail": "v1.3.0",
+      "laravel/pint": "v1.32.2",
+      "laravel/sail": "v1.70.0",
+      "mockery/mockery": "1.6.15",
+      "myclabs/deep-copy": "1.14.0",
+      "nunomaduro/collision": "v8.9.6",
+      "phar-io/manifest": "2.0.4",
+      "phar-io/version": "3.2.1",
+      "phpunit/php-code-coverage": "11.0.12",
+      "phpunit/php-file-iterator": "5.1.1",
+      "phpunit/php-invoker": "5.0.1",
+      "phpunit/php-text-template": "4.0.1",
+      "phpunit/php-timer": "7.0.1",
+      "phpunit/phpunit": "11.5.57",
+      "sebastian/cli-parser": "3.0.2",
+      "sebastian/code-unit": "3.0.3",
+      "sebastian/code-unit-reverse-lookup": "4.0.1",
+      "sebastian/comparator": "6.3.3",
+      "sebastian/complexity": "4.0.1",
+      "sebastian/diff": "6.0.2",
+      "sebastian/environment": "7.2.1",
+      "sebastian/exporter": "6.3.2",
+      "sebastian/global-state": "7.0.2",
+      "sebastian/lines-of-code": "3.0.1",
+      "sebastian/object-enumerator": "6.0.1",
+      "sebastian/object-reflector": "4.0.1",
+      "sebastian/recursion-context": "6.0.3",
+      "sebastian/type": "5.1.3",
+      "sebastian/version": "5.0.2",
+      "staabm/side-effects-detector": "1.0.5",
+      "symfony/yaml": "v8.1.11",
+      "theseer/tokenizer": "1.3.1"
+    },
+    "controls_verified": {
+      "same_initial_code_and_plan": true,
+      "same_model_configuration_and_prompt": true,
+      "same_composer_json_and_lock": true,
+      "existing_eight_tests_preserved_all_runs": true,
+      "identical_thirteen_acceptance_cases_passed_all_runs": true,
+      "no_framework_imports_added_to_domain_or_application": true,
+      "valid_done_plan_with_14_fields_all_runs": true,
+      "published_versions_unchanged_during_experiment": true
+    },
+    "initial_acceptance": {
+      "cases": 13,
+      "expected_failures": 4,
+      "framework_errors": 0
+    },
+    "metric_definitions": {
+      "wall_seconds": "Desde iniciar Codex CLI hasta su salida; excluye Composer, precalentamiento y aceptación independiente.",
+      "first_php_change_seconds": "Primer evento de cambio PHP, incluidas pruebas.",
+      "command_executions": "Cada evento command_execution completado cuenta uno, aunque incluya varios subcomandos.",
+      "input_tokens": "Entrada acumulada informada por Codex, incluida caché; no es texto único ni una estimación monetaria.",
+      "original_requirement_reads": "Lectura observada por ruta explícita o por el identificador del documento original impreso en la salida."
+    },
+    "limits": [
+      "Un caso sintético acotado, dos ejecuciones por versión; no representa todos los proyectos Laravel.",
+      "Laravel real con dominio, caso de uso y pruebas HTTP; sin persistencia, permisos ni frontend.",
+      "La suite inicial de 8 casos y la aceptación de 13 son idénticas. Las regresiones adicionales creadas por el agente varían; se registran sus cantidades.",
+      "Caché, latencia del servicio y decisiones del modelo pueden variar; no son garantías de tiempo o costo.",
+      "No se alteraron las instrucciones de ninguna versión ni se descartaron ejecuciones."
+    ]
+  }
+}

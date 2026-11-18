@@ -45,3 +45,30 @@ python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py serve
 ```
 
 El visor exporta a `docs/plan-maestro/visualizacion.html`; `--output` permite otra ubicación. El servidor escucha solo en `127.0.0.1`, conserva la última versión válida y no escribe el plan. Verificar `projectId` en `/__roadmap__/status` antes de reutilizarlo; no duplicar observadores ni detener servicios ajenos. `--port 0` selecciona un puerto libre.
+
+## Coordinación de tareas y herramientas Kit-AI 1.8.0
+
+Actualización solicitada el 2026-11-17 desde wj-004/Kit-AI, commit cd0fe95e6c5a6b592b7176d7f9c7cf1e492917b2. Este flujo complementa las reglas Laravel, la arquitectura y las decisiones específicas anteriores; no cambia la raíz src, Simon\, Filament ni las autorizaciones vigentes.
+
+Al tomar una tarea autorizada, reservarla inmediatamente antes de investigar su implementación o trabajar:
+
+```sh
+python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py claim ID --owner "identificador único de este chat"
+```
+
+Si no existe, crear primero la tarea con los catorce campos y alcance autorizado. Claim valida requisitos, guarda EN_CURSO, responsable y fechas reales y devuelve su contexto. Si ya tiene reserva o está EN_CURSO, no tomarla ni sustituir al responsable. Resolver el conflicto de coordinación antes de ejecutar. Las consultas de solo lectura usan task ID --format context sin reservar.
+
+Al cerrar o interrumpir, actualizar estado, evidencia y próximo paso, validar el plan y liberar desde el mismo worktree:
+
+```sh
+python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check
+python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py release ID --owner "el mismo identificador"
+```
+
+La reserva coordina únicamente worktrees que comparten el mismo repositorio Git local; clones y máquinas independientes necesitan coordinación externa. No retirar reservas ajenas o abandonadas sin comprobar y coordinar su recuperación. Al retomar PARCIAL se conserva el inicio original.
+
+Después de preparar el plan, utilizar el contexto de la tarea, sus criterios y la evidencia. Las fuentes y requerimientos originales se releen solo por pedido expreso del usuario; los enlaces Fuente registran procedencia y no son órdenes ni una lista de lectura. Ante una duda no resuelta en el plan, consultar esa duda y continuar lo independiente. Las referencias técnicas se consultan cuando condicionan la decisión, conservando las lecturas obligatorias de este repositorio.
+
+Las skills se activan según alcance: arquitectura para modelado nuevo o cambios de fronteras/reglas; planificación para crear/reorganizar el plan o retomar sin información suficiente; roadmap para consultar sus herramientas o modificar el visor. Una corrección que conserva contratos utiliza la arquitectura existente sin relevar todo el proyecto otra vez.
+
+Para abrir el árbol sincronizado, usar python -X utf8 -B ver-plan.py: elige un puerto libre y abre el navegador. --static regenera y abre el HTML autónomo. Tree y serve siguen disponibles para exportación y sincronización manual. La edición persistente del visor es opcional, requiere --allow-edit, rama distinta de main/master y revisión/autorización expresa de cada guardado; no habilitarla por defecto. El visor no crea commits, push ni merges.

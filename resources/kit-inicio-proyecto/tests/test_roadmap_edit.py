@@ -7,7 +7,16 @@ from unittest.mock import patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
-from test_kit import PlanFixture, create_symlink, task
+from test_kit import PlanFixture, task
+
+
+def create_symlink(test, link, target):
+    try:
+        link.symlink_to(target)
+    except OSError as error:
+        if getattr(error, "winerror", None) == 1314:
+            test.skipTest("Windows no permite crear enlaces simbólicos (WinError 1314).")
+        raise
 from plan_model import parse_plan
 from roadmap import render, snapshot
 from roadmap_edit import EditConflict, persist, proposal
@@ -81,6 +90,18 @@ class EditTest(EditFixture):
         self.assertEqual(original + '\nPrueba nueva: resultado y límite.',
                          parse_plan(self.plan)['tasks'][0]['fields']['Evidencia actual'])
 
+    def test_edit_preserves_embedded_visual_evidence(self):
+        (self.plan / 'captura.png').write_bytes(b'imagen')
+        self.source.write_text(task(**{'Evidencia actual': 'Resultado\n![Captura](captura.png)'}), encoding='utf-8')
+        self.assertTrue(self.monitor.refresh(), self.monitor.error)
+        before = self.monitor.graph['tasks'][0]['images']
+        self.assertEqual('data:image/png;base64,aW1hZ2Vu', before[0]['src'])
+        reviewed = proposal(self.monitor, self.payload(fields={'Alcance': 'Descripción revisada'}))
+        persist(self.monitor, reviewed)
+        self.assertTrue(self.monitor.refresh(), self.monitor.error)
+        self.assertEqual(before, self.monitor.graph['tasks'][0]['images'])
+        self.assertEqual('Resultado\n![Captura](captura.png)', self.monitor.graph['tasks'][0]['fields']['Evidencia actual'])
+
     def test_stale_revision_and_external_changes_reject_without_overwriting(self):
         payload = self.payload()
         reviewed = proposal(self.monitor, payload)
@@ -117,6 +138,15 @@ class EditTest(EditFixture):
         create_symlink(self, self.source, outside)
         with self.assertRaises(ValueError):
             proposal(self.monitor, self.payload())
+
+    def test_alias_above_the_plan_does_not_reject_regular_sources(self):
+        alias = self.root / 'workspace-alias'
+        create_symlink(self, alias, self.root)
+        self.monitor.plan_dir = alias / 'docs/plan-maestro'
+        reviewed = proposal(self.monitor, self.payload())
+        self.assertEqual(self.source.resolve(), reviewed['path'])
+        persist(self.monitor, reviewed)
+        self.assertEqual('Título revisado', parse_plan(self.plan)['tasks'][0]['title'])
 
     def test_static_export_has_no_live_capability_or_session_secret(self):
         graph, _ = snapshot(self.root, self.plan, self.output)

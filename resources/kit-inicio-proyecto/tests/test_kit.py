@@ -18,7 +18,7 @@ from urllib.request import Request, urlopen
 KIT = Path(__file__).resolve().parents[1]
 SCRIPTS = KIT / 'skills/manage-project-roadmap/scripts'
 sys.path.insert(0, str(SCRIPTS))
-from plan_model import FIELDS, SCHEMA, STATES, parse_plan
+from plan_model import FIELDS, MAX_IMAGE_BYTES, SCHEMA, STATES, parse_plan
 from roadmap import metadata, render, snapshot
 from roadmap_server import Monitor, create_server
 
@@ -79,7 +79,7 @@ class PlanFixture(unittest.TestCase):
 
     def cli(self, *args):
         return subprocess.run([sys.executable, '-X', 'utf8', '-B', str(SCRIPTS / 'roadmap.py'), *args, '--root', str(self.root)],
-                              capture_output=True, text=True, encoding='utf-8', timeout=15)
+                              capture_output=True, text=True, encoding='utf-8', timeout=20)
 
 
 class ParserTest(PlanFixture):
@@ -183,6 +183,25 @@ class ParserTest(PlanFixture):
 
 
 class ReportAndExportTest(PlanFixture):
+    def test_summary_omits_task_details_but_keeps_counts_and_all_errors(self):
+        self.validate(task(status='HECHO') + task('QA-002'))
+        result = self.cli('report', '--summary', '--json', '--status', 'PENDIENTE')
+        report = json.loads(result.stdout)
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(2, report['totalTasks'])
+        self.assertEqual(1, report['selectedTasks'])
+        self.assertEqual({'HECHO': 1, 'PENDIENTE': 1}, report['counts'])
+        self.assertNotIn('tasks', report)
+        self.assertNotIn('edges', report)
+        invalid = self.validate(task(dependencies='QA-998') + task('QA-002', dependencies='QA-999'))
+        result = self.cli('check', '--summary', '--json')
+        self.assertEqual(1, result.returncode)
+        self.assertEqual(invalid['errors'], json.loads(result.stdout)['errors'])
+        text = self.cli('report', '--summary')
+        self.assertEqual(1, text.returncode)
+        for error in invalid['errors']:
+            self.assertIn(error, text.stdout)
+
     def test_json_filter_still_validates_the_whole_plan(self):
         self.validate(task(status='HECHO') + task('QA-002'))
         result = self.cli('report', '--json', '--status', 'PENDIENTE')
@@ -229,14 +248,202 @@ class ReportAndExportTest(PlanFixture):
         other, _ = snapshot(self.root, self.plan, self.root / 'exports/view.html')
         self.assertEqual('../docs/plan-maestro/01-prueba.md', other['tasks'][0]['sourceUrl'])
 
+    def test_evidence_images_are_embedded_and_keep_the_export_self_contained(self):
+        folder = self.plan / 'capturas'
+        folder.mkdir()
+        (folder / 'despues.PNG').write_bytes(b'imagen')
+        self.validate(task(**{'Evidencia actual': 'Pantalla lista\n  - ![Después del cambio](capturas/despues.PNG)'}))
+        report = parse_plan(self.plan)
+        self.assertEqual([{'alt': 'Después del cambio', 'path': 'capturas/despues.PNG'}], report['tasks'][0]['images'])
+        graph, _ = snapshot(self.root, self.plan, self.output)
+        self.assertEqual([{'alt': 'Después del cambio', 'src': 'data:image/png;base64,aW1hZ2Vu'}], graph['tasks'][0]['images'])
+        self.assertIn('data:image/png;base64,aW1hZ2Vu', render(graph))
+
+    def test_invalid_evidence_images_are_rejected(self):
+        (self.root / 'privada.png').write_bytes(b'privada')
+        (self.plan / 'script.svg').write_text('<svg/>', encoding='utf-8')
+        (self.plan / 'bien.png').write_bytes(b'imagen')
+        (self.plan / 'grande.png').write_bytes(b'0' * (MAX_IMAGE_BYTES + 1))
+        for reference, expected in (('![fuera](../../privada.png)', 'dentro del plan'), ('![falta](falta.png)', 'no existe'),
+                                    ('![web](https://example.com/a.png)', 'ruta relativa'), ('![svg](script.svg)', 'no permitido'),
+                                    ('![](bien.png)', 'texto alternativo'), ('![grande](grande.png)', 'supera')):
+            with self.subTest(reference=reference):
+                report = self.validate(task(**{'Evidencia actual': reference}))
+                self.assertFalse(report['valid'])
+                self.assertIn(expected, ' '.join(report['errors']))
+
+    def test_image_symlinks_and_symlinked_parent_directories_are_rejected(self):
+        folder = self.plan / 'original'
+        folder.mkdir()
+        (folder / 'captura.png').write_bytes(b'imagen')
+        create_symlink(self, self.plan / 'enlace.png', folder / 'captura.png')
+        create_symlink(self, self.plan / 'enlaces', folder, is_directory=True)
+        for path in ('enlace.png', 'enlaces/captura.png'):
+            with self.subTest(path=path):
+                report = self.validate(task(**{'Evidencia actual': f'![Captura]({path})'}))
+                self.assertFalse(report['valid'])
+                self.assertIn('enlaces simbólicos', ' '.join(report['errors']))
+
+    def test_nested_task_can_reference_an_image_in_its_parent_plan_directory(self):
+        (self.plan / 'captura.png').write_bytes(b'imagen')
+        nested = self.plan / 'modulo'
+        nested.mkdir()
+        self.validate(task())
+        (nested / 'otra.md').write_text(task('QA-002', **{'Evidencia actual': '![Captura](../captura.png)'}), encoding='utf-8')
+        report = parse_plan(self.plan)
+        self.assertTrue(report['valid'], report['errors'])
+        self.assertEqual('captura.png', next(item for item in report['tasks'] if item['id'] == 'QA-002')['images'][0]['path'])
+
+    def test_export_rechecks_an_image_if_it_becomes_a_symlink_after_validation(self):
+        from unittest.mock import patch
+        image = self.plan / 'captura.png'
+        image.write_bytes(b'imagen')
+        self.validate(task(**{'Evidencia actual': '![Captura](captura.png)'}))
+        real_parse = parse_plan
+        secret = self.root / 'privada.png'
+        secret.write_bytes(b'NO EXPORTAR')
+        def replace_after_parse(plan):
+            report = real_parse(plan)
+            image.unlink()
+            create_symlink(self, image, secret)
+            return report
+        with patch('roadmap.parse_plan', side_effect=replace_after_parse):
+            with self.assertRaises((ValueError, OSError)):
+                snapshot(self.root, self.plan, self.output)
+        self.assertFalse(self.output.exists())
+
+    def test_query_with_images_keeps_all_fields_and_does_not_embed_binary_payloads(self):
+        (self.plan / 'captura.png').write_bytes(b'imagen')
+        report = self.validate(task(**{'Evidencia actual': '![Captura](captura.png)'}))
+        result = self.cli('task', 'QA-001', '--format', 'json')
+        self.assertEqual(0, result.returncode, result.stderr)
+        context = json.loads(result.stdout)
+        self.assertEqual(report['tasks'][0]['fields'], context['task']['fields'])
+        self.assertNotIn('data:image', result.stdout)
+
     def test_invalid_plan_or_output_keeps_the_previous_artifact(self):
         self.output.write_text('Previous valid artifact', encoding='utf-8')
         self.validate(task(dependencies='QA-999'))
         self.assertEqual(1, self.cli('tree').returncode)
-        self.assertEqual('Previous valid artifact', self.output.read_text(encoding='utf-8'))
+        self.assertEqual('Previous valid artifact', self.output.read_text())
         before = self.source.read_bytes()
         self.assertEqual(1, self.cli('tree', '--output', str(self.source)).returncode)
         self.assertEqual(before, self.source.read_bytes())
+
+
+class TaskContextTest(PlanFixture):
+    def test_selected_task_preserves_all_fields_and_multiline_content_without_unrelated_tasks(self):
+        evidence = 'Primera línea\n  - informe: docs/evidencia/QA-002.md\n  - ' + 'x' * 5000
+        original = self.validate(task('QA-001', status='HECHO')
+                                 + task('QA-002', dependencies='QA-001', **{'Evidencia actual': evidence})
+                                 + task('QA-003', title='No incluir esta tarea'))
+        result = self.cli('task', 'QA-002', '--format', 'json')
+        self.assertEqual(0, result.returncode, result.stderr)
+        context = json.loads(result.stdout)
+        self.assertEqual(original['tasks'][1]['fields'], context['task']['fields'])
+        self.assertEqual(list(FIELDS), context['fieldNames'])
+        self.assertEqual('PENDIENTE', context['task']['status'])
+        self.assertEqual('SOLICITADO', context['task']['scope'])
+        self.assertNotIn('No incluir esta tarea', result.stdout)
+        text = self.cli('task', 'QA-002', '--format', 'context')
+        self.assertEqual(0, text.returncode, text.stderr)
+        for field, value in original['tasks'][1]['fields'].items():
+            self.assertIn(field + ':\n' + value, text.stdout)
+
+    def test_dependencies_are_direct_summaries_with_correct_states_and_locations(self):
+        self.validate(task('QA-001', status='HECHO') + task('QA-002', status='EN_CURSO', dependencies='QA-001')
+                      + task('QA-003', dependencies='QA-002, QA-001'))
+        result = self.cli('task', 'QA-003', '--json')
+        context = json.loads(result.stdout)
+        self.assertEqual(0, result.returncode, result.stderr)
+        dependencies = context['dependencies']
+        self.assertEqual(['QA-002', 'QA-001'], [item['id'] for item in dependencies])
+        self.assertEqual(['EN_CURSO', 'HECHO'], [item['status'] for item in dependencies])
+        for item in dependencies:
+            self.assertNotIn('fields', item)
+            self.assertEqual('docs/plan-maestro/01-prueba.md', item['sourcePath'])
+            line = (self.root / item['sourcePath']).read_text().splitlines()[item['line'] - 1]
+            self.assertIn(item['id'], line)
+        context = json.loads(self.cli('task', 'QA-002', '--json').stdout)
+        self.assertEqual(['QA-001'], [item['id'] for item in context['dependencies']])
+
+    def test_no_dependencies_and_default_context(self):
+        result = self.cli('task', 'QA-001')
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertIn('Dependencias directas (resumen; consultar por ID si hace falta):\nninguna', result.stdout)
+        context = json.loads(self.cli('task', 'QA-001', '--format', 'json').stdout)
+        self.assertEqual([], context['dependencies'])
+        self.assertEqual('docs/plan-maestro/README.md', context['references']['planIndex'])
+
+    def test_missing_id_is_a_clear_error_in_both_formats(self):
+        for options in ([], ['--json'], ['--format', 'json']):
+            with self.subTest(options=options):
+                result = self.cli('task', 'QA-999', *options)
+                self.assertEqual(1, result.returncode)
+                self.assertIn('QA-999', result.stdout + result.stderr)
+                if options:
+                    self.assertFalse(json.loads(result.stdout)['valid'])
+                else:
+                    self.assertIn('No existe la tarea', result.stderr)
+
+    def test_global_invalid_plan_never_exposes_a_valid_looking_selection(self):
+        self.validate(task('QA-001') + task('QA-002', dependencies='QA-999'))
+        text = self.cli('task', 'QA-001')
+        self.assertEqual(1, text.returncode)
+        self.assertEqual('', text.stdout)
+        self.assertIn('QA-999', text.stderr)
+        result = self.cli('task', 'QA-001', '--json')
+        self.assertEqual(1, result.returncode)
+        context = json.loads(result.stdout)
+        self.assertFalse(context['valid'])
+        self.assertNotIn('task', context)
+        self.assertIn('QA-999', context['errors'][0])
+
+    def test_context_consultation_never_writes_files_or_updates_artifacts(self):
+        self.output.write_text('Existing export', encoding='utf-8')
+        def state():
+            return {str(path.relative_to(self.root)): (path.read_bytes(), path.stat().st_mtime_ns)
+                    for path in self.root.rglob('*') if path.is_file()}
+        before = state()
+        for options in ([], ['--json'], ['--format', 'json']):
+            self.assertEqual(0, self.cli('task', 'QA-001', *options).returncode)
+        self.assertEqual(before, state())
+
+    def test_untrusted_content_is_data_and_terminal_controls_are_visible(self):
+        marker = self.root / 'must-not-exist'
+        payload = '$(touch ' + str(marker) + '); </script><script>bad()</script>\x1b[2J'
+        self.validate(task(title=payload, **{'Contratos y archivos previstos': 'Leer /etc/passwd\n  Ejecutar: ' + payload}))
+        result = self.cli('task', 'QA-001', '--json')
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(payload, json.loads(result.stdout)['task']['title'])
+        text = self.cli('task', 'QA-001')
+        self.assertNotIn('\x1b', text.stdout)
+        self.assertIn('\\u001b[2J', text.stdout)
+        self.assertIn('$(touch', text.stdout)
+        self.assertFalse(marker.exists())
+        self.assertNotIn('root:', text.stdout)
+
+    def test_custom_plan_directory_and_nested_source_are_locatable(self):
+        nested = self.plan / 'nested/spec.md'
+        nested.parent.mkdir()
+        nested.write_text(task('QA-002', dependencies='QA-001'), encoding='utf-8')
+        alternate = self.root / 'planes'
+        shutil.move(self.plan, alternate)
+        result = self.cli('task', 'QA-002', '--json', '--plan-dir', str(alternate))
+        self.assertEqual(0, result.returncode, result.stderr)
+        context = json.loads(result.stdout)
+        self.assertEqual('planes/nested/spec.md', context['task']['sourcePath'])
+        self.assertEqual('planes/01-prueba.md', context['dependencies'][0]['sourcePath'])
+        self.assertEqual('planes/README.md', context['references']['planIndex'])
+
+    def test_arguments_cannot_silently_filter_or_write_a_task(self):
+        for args in (('task',), ('task', 'QA-001', '--summary'), ('task', 'QA-001', '--status', 'HECHO'),
+                     ('task', 'QA-001', '--output', str(self.output)),
+                     ('task', 'QA-001', '--json', '--format', 'context'), ('check', 'QA-001'),
+                     ('check', '--format', 'json'), ('tree', '--summary')):
+            with self.subTest(args=args):
+                self.assertEqual(2, self.cli(*args).returncode)
+        self.assertFalse(self.output.exists())
 
 
 class MonitorTest(PlanFixture):
@@ -294,6 +501,16 @@ class MonitorTest(PlanFixture):
         moved.unlink()
         self.assertTrue(monitor.refresh())
         self.assertEqual(1, len(monitor.graph['tasks']))
+
+    def test_replacing_an_evidence_image_updates_the_snapshot(self):
+        image = self.plan / 'captura.png'
+        image.write_bytes(b'antes')
+        self.validate(task(**{'Evidencia actual': '![Captura](captura.png)'}))
+        monitor = self.monitor()
+        previous = monitor.graph['tasks'][0]['images'][0]['src']
+        image.write_bytes(b'despues')
+        self.assertTrue(monitor.refresh())
+        self.assertNotEqual(previous, monitor.graph['tasks'][0]['images'][0]['src'])
 
     def test_source_race_and_write_error_do_not_publish_partial_updates(self):
         monitor = self.monitor()
@@ -370,7 +587,7 @@ class HttpTest(PlanFixture):
         output.write_text('Keep it', encoding='utf-8')
         result = self.cli('serve', '--port', str(self.server.server_port), '--output', str(output))
         self.assertNotEqual(0, result.returncode)
-        self.assertEqual('Keep it', output.read_text(encoding='utf-8'))
+        self.assertEqual('Keep it', output.read_text())
 
 
 class InstallerTest(unittest.TestCase):
@@ -387,7 +604,7 @@ class InstallerTest(unittest.TestCase):
 
     def test_installation_prepares_skills_and_three_pending_tasks_without_product_code(self):
         self.install()
-        config = json.loads((self.target / '.agents/project.json').read_text(encoding='utf-8'))
+        config = json.loads((self.target / '.agents/project.json').read_text())
         self.assertEqual('base', config['profile'])
         self.assertEqual('preparacion', config['stage'])
         self.assertEqual('src', config['source_root'])
@@ -417,43 +634,94 @@ class InstallerTest(unittest.TestCase):
         self.assertEqual(set(before), set(repeated['unchanged']))
         self.assertEqual(before, {name: (self.target / name).stat().st_mtime_ns for name in before})
 
-    def test_all_profiles_install_without_assuming_a_framework_for_base(self):
-        for profile in initializer.PROFILES:
+    def test_profiles_prepare_their_roots_and_repeat_without_product_code(self):
+        for profile, expected in {'base': 'src', 'laravel': 'src', 'go': 'internal', 'flutter': 'lib'}.items():
             with self.subTest(profile=profile):
                 target = self.root / profile
-                self.install(target=target, profile=profile)
-                config = json.loads((target / '.agents/project.json').read_text(encoding='utf-8'))
+                preview = self.install(target=target, profile=profile, dry_run=True)
+                self.assertFalse(target.exists())
+                self.assertIn(expected + '/.gitkeep', preview['create'])
+                if profile == 'go':
+                    self.assertIn('cmd/.gitkeep', preview['create'])
+                result = self.install(target=target, profile=profile)
+                config = json.loads((target / '.agents/project.json').read_text())
                 self.assertEqual(profile, config['profile'])
-                self.assertEqual('src', config['source_root'])
-                self.assertTrue((target / 'src/.gitkeep').is_file())
-                for alternative in ('app/Contexts', 'lib', 'internal'):
+                self.assertEqual(expected, config['source_root'])
+                self.assertEqual(expected, config['source_root_default'])
+                self.assertFalse(config['source_root_override'])
+                self.assertEqual([target / expected / '.gitkeep'], list((target / expected).iterdir()))
+                prepared = {expected, 'cmd'} if profile == 'go' else {expected}
+                for alternative in {'src', 'lib', 'internal', 'cmd', 'app', 'go.mod', 'pubspec.yaml', 'composer.json'} - prepared:
                     self.assertFalse((target / alternative).exists())
                 self.assertTrue(parse_plan(target / 'docs/plan-maestro')['valid'])
+                before = {name: (target / name).stat().st_mtime_ns for name in result['create']}
+                self.assertEqual([], self.install(target=target, profile=profile, started=None)['create'])
+                self.assertEqual(before, {name: (target / name).stat().st_mtime_ns for name in before})
 
     def test_explicit_source_root_is_used_and_preserved_on_repeat(self):
-        self.install(source_root='codigo propio/contextos')
-        config = json.loads((self.target / '.agents/project.json').read_text(encoding='utf-8'))
-        self.assertEqual('codigo propio/contextos', config['source_root'])
-        self.assertTrue(config['source_root_override'])
-        self.assertTrue((self.target / config['source_root'] / '.gitkeep').is_file())
-        self.assertFalse((self.target / 'src').exists())
-        self.assertEqual([], self.install(source_root=None, started=None)['create'])
-        before = {path.relative_to(self.target): path.read_bytes() for path in self.target.rglob('*') if path.is_file()}
-        with self.assertRaises(ValueError):
-            self.install(source_root='src')
-        self.assertEqual(before, {path.relative_to(self.target): path.read_bytes() for path in self.target.rglob('*') if path.is_file()})
+        for profile, default in {'base': 'src', 'laravel': 'src', 'go': 'internal', 'flutter': 'lib'}.items():
+            with self.subTest(profile=profile):
+                target = self.root / profile
+                self.install(target=target, profile=profile, source_root='codigo propio/contextos')
+                config = json.loads((target / '.agents/project.json').read_text())
+                self.assertEqual('codigo propio/contextos', config['source_root'])
+                self.assertEqual(default, config['source_root_default'])
+                self.assertTrue(config['source_root_override'])
+                self.assertTrue((target / config['source_root'] / '.gitkeep').is_file())
+                self.assertFalse((target / default).exists())
+                if profile == 'go':
+                    self.assertTrue((target / 'cmd/.gitkeep').is_file())
+                self.assertEqual([], self.install(target=target, profile=profile, started=None)['create'])
+                before = {path.relative_to(target): path.read_bytes() for path in target.rglob('*') if path.is_file()}
+                with self.assertRaises(ValueError):
+                    self.install(target=target, profile=profile, source_root=default)
+                self.assertEqual(before, {path.relative_to(target): path.read_bytes() for path in target.rglob('*') if path.is_file()})
 
-    def test_cli_uses_src_unless_a_different_source_root_is_explicit(self):
-        command = [sys.executable, '-X', 'utf8', '-B', str(KIT / 'scripts/init_project.py'), '--name', 'Proyecto CLI', '--profile', 'laravel']
-        for folder, options, expected in (('default', [], 'src'), ('explicit', ['--source-root', 'app/Contexts'], 'app/Contexts')):
-            with self.subTest(folder=folder):
+    def test_legacy_go_and_flutter_roots_are_retained_without_partial_upgrade(self):
+        for profile, default in {'go': 'internal', 'flutter': 'lib'}.items():
+            with self.subTest(profile=profile):
+                target = self.root / profile
+                self.install(target=target, profile=profile, source_root='src')
+                manifest = target / '.agents/project-kit.json'
+                old = json.loads(manifest.read_text())
+                old['kit_version'] = '1.2.0'
+                manifest.write_text(json.dumps(old), encoding='utf-8')
+                config_path = target / '.agents/project.json'
+                old_config = json.loads(config_path.read_text())
+                old_config.pop('source_root_default')
+                old_config['source_root_override'] = False
+                config_path.write_text(json.dumps(old_config), encoding='utf-8')
+                business = target / 'src/existing.txt'
+                business.write_text('Preserve existing code', encoding='utf-8')
+                before = {path.relative_to(target): path.read_bytes() for path in target.rglob('*') if path.is_file()}
+                prepared = initializer.prepare(target, 'Proyecto ágil', profile)
+                config = json.loads(prepared['.agents/project.json'])
+                self.assertEqual('src', config['source_root'])
+                self.assertEqual(default, config['source_root_default'])
+                self.assertNotIn(default + '/.gitkeep', prepared)
+                with self.assertRaisesRegex(ValueError, 'Instalación sin cambios'):
+                    self.install(target=target, profile=profile, started=None)
+                self.assertEqual(before, {path.relative_to(target): path.read_bytes() for path in target.rglob('*') if path.is_file()})
+                self.assertFalse((target / default).exists())
+
+    def test_cli_uses_profile_defaults_or_an_explicit_root(self):
+        command = [sys.executable, '-X', 'utf8', '-B', str(KIT / 'scripts/init_project.py'), '--name', 'Proyecto CLI']
+        cases = (('laravel', [], 'src'), ('laravel', ['--source-root', 'app/Contexts'], 'app/Contexts'),
+                 ('go', [], 'internal'), ('go', ['--source-root', 'codigo'], 'codigo'),
+                 ('flutter', [], 'lib'), ('flutter', ['--source-root', 'cliente/lib'], 'cliente/lib'))
+        for index, (profile, options, expected) in enumerate(cases):
+            with self.subTest(profile=profile, options=options):
+                folder = str(index)
                 target = self.root / folder
-                result = subprocess.run(command + ['--target', str(target)] + options, capture_output=True, text=True, encoding='utf-8', timeout=15)
+                result = subprocess.run(command + ['--target', str(target), '--profile', profile] + options, capture_output=True, text=True, encoding='utf-8', timeout=20)
                 self.assertEqual(0, result.returncode, result.stderr)
-                config = json.loads((target / '.agents/project.json').read_text(encoding='utf-8'))
+                config = json.loads((target / '.agents/project.json').read_text())
                 self.assertEqual(expected, config['source_root'])
                 self.assertTrue((target / expected / '.gitkeep').is_file())
-                self.assertFalse((target / ('app' if expected == 'src' else 'src')).exists())
+                if expected != 'src':
+                    self.assertFalse((target / 'src').exists())
+                if profile == 'go':
+                    self.assertTrue((target / 'cmd/.gitkeep').is_file())
 
     def test_invalid_source_roots_do_not_create_target_files(self):
         for source_root in ('', '.', '..', '../outside', '/src', 'src/../outside', 'src//core', 'src/./core',
@@ -463,31 +731,37 @@ class InstallerTest(unittest.TestCase):
             self.assertFalse(self.target.exists())
 
     def test_incompatible_source_root_blocks_all_writes(self):
-        self.target.mkdir()
-        source = self.target / 'src'
-        source.write_text('Existing file', encoding='utf-8')
-        with self.assertRaises(ValueError):
-            self.install()
-        self.assertEqual([source], list(self.target.iterdir()))
-        self.assertEqual('Existing file', source.read_text(encoding='utf-8'))
+        for profile, root_name in (('base', 'src'), ('go', 'internal'), ('go', 'cmd'), ('flutter', 'lib')):
+            with self.subTest(profile=profile, root=root_name):
+                target = self.root / (profile + '-' + root_name)
+                target.mkdir()
+                source = target / root_name
+                source.write_text('Existing file', encoding='utf-8')
+                with self.assertRaises(ValueError):
+                    self.install(target=target, profile=profile)
+                self.assertEqual([source], list(target.iterdir()))
+                self.assertEqual('Existing file', source.read_text())
 
-    def test_linked_source_root_blocks_all_writes(self):
-        self.target.mkdir()
-        source = self.target / 'src'
-        outside = self.root / 'external-code'
-        outside.mkdir()
-        create_symlink(self, source, outside, is_directory=True)
-        with self.assertRaises(ValueError):
-            self.install()
-        self.assertEqual([], list(outside.iterdir()))
-        self.assertEqual([source], list(self.target.iterdir()))
+    def test_symlink_source_root_blocks_all_writes(self):
+        for profile, root_name in (('base', 'src'), ('go', 'internal'), ('go', 'cmd'), ('flutter', 'lib')):
+            with self.subTest(profile=profile, root=root_name):
+                target = self.root / (profile + '-' + root_name)
+                target.mkdir()
+                source = target / root_name
+                outside = self.root / ('external-' + profile + '-' + root_name)
+                outside.mkdir()
+                create_symlink(self, source, outside, is_directory=True)
+                with self.assertRaises(ValueError):
+                    self.install(target=target, profile=profile)
+                self.assertEqual([], list(outside.iterdir()))
+                self.assertEqual([source], list(target.iterdir()))
 
     def test_existing_business_files_are_preserved_without_creating_framework_contexts(self):
         source = self.target / 'src/Orders/Domain/order.php'
         source.parent.mkdir(parents=True)
         source.write_text('Existing business code', encoding='utf-8')
         self.install(profile='laravel')
-        self.assertEqual('Existing business code', source.read_text(encoding='utf-8'))
+        self.assertEqual('Existing business code', source.read_text())
         self.assertFalse((self.target / 'app').exists())
 
     def test_conflicting_agents_or_managed_file_blocks_all_writes(self):
@@ -496,7 +770,7 @@ class InstallerTest(unittest.TestCase):
         agents.write_text('Existing instructions', encoding='utf-8')
         with self.assertRaises(ValueError):
             self.install()
-        self.assertEqual('Existing instructions', agents.read_text(encoding='utf-8'))
+        self.assertEqual('Existing instructions', agents.read_text())
         self.assertEqual([agents], list(self.target.iterdir()))
         agents.unlink()
         self.install()
@@ -531,6 +805,19 @@ class InstallerTest(unittest.TestCase):
             self.install()
         self.assertFalse(self.target.exists())
 
+    def test_missing_detail_reference_blocks_installation_before_target_creation(self):
+        for index, relative in enumerate(('arquitectura-hexagonal-ddd/references/diseno-y-modelado.md',
+                                          'manage-project-roadmap/references/herramientas.md',
+                                          'manage-project-roadmap/scripts/roadmap_edit.py',
+                                          'manage-project-roadmap/assets/roadmap-context.js')):
+            with self.subTest(resource=relative):
+                copied = self.root / ('incomplete-kit-' + str(index))
+                shutil.copytree(KIT, copied, ignore=shutil.ignore_patterns('__pycache__'))
+                (copied / 'skills' / relative).unlink()
+                with patch.object(initializer, 'KIT', copied), self.assertRaisesRegex(ValueError, 'Recurso ausente'):
+                    self.install()
+                self.assertFalse(self.target.exists())
+
 
 class PackageTest(unittest.TestCase):
     def test_reproducible_archive_can_be_moved_extracted_and_used_without_source_paths(self):
@@ -550,15 +837,20 @@ class PackageTest(unittest.TestCase):
             extracted = moved / 'kit-inicio-proyecto'
             project = root / 'New project'
             result = subprocess.run([sys.executable, '-X', 'utf8', '-B', str(extracted / 'scripts/init_project.py'), '--target', str(project),
-                                     '--name', 'Proyecto portable', '--profile', 'go', '--date', '2026-11-03'], capture_output=True, text=True, encoding='utf-8', timeout=15)
+                                     '--name', 'Proyecto portable', '--profile', 'go', '--date', '2026-11-03'], capture_output=True, text=True, encoding='utf-8', timeout=20)
             self.assertEqual(0, result.returncode, result.stderr)
-            self.assertTrue((project / 'src/.gitkeep').is_file())
+            self.assertTrue((project / 'internal/.gitkeep').is_file())
+            self.assertTrue((project / 'cmd/.gitkeep').is_file())
+            self.assertFalse((project / 'src').exists())
             self.assertTrue((project / 'docs/fuentes/README.md').is_file())
             command = [sys.executable, '-X', 'utf8', '-B', str(project / '.agents/skills/manage-project-roadmap/scripts/roadmap.py')]
-            report = subprocess.run(command + ['report', '--root', str(project), '--json'], capture_output=True, text=True, encoding='utf-8', timeout=15)
+            context = subprocess.run(command + ['task', 'INI-002', '--root', str(project), '--json'], capture_output=True, text=True, encoding='utf-8', timeout=20)
+            self.assertEqual(0, context.returncode, context.stderr)
+            self.assertEqual('INI-001', json.loads(context.stdout)['dependencies'][0]['id'])
+            report = subprocess.run(command + ['report', '--root', str(project), '--json'], capture_output=True, text=True, encoding='utf-8', timeout=20)
             self.assertEqual(0, report.returncode, report.stderr)
             self.assertEqual(3, len(json.loads(report.stdout)['tasks']))
-            rendered = subprocess.run(command + ['tree', '--root', str(project)], capture_output=True, text=True, encoding='utf-8', timeout=15)
+            rendered = subprocess.run(command + ['tree', '--root', str(project)], capture_output=True, text=True, encoding='utf-8', timeout=20)
             self.assertEqual(0, rendered.returncode, rendered.stderr)
             self.assertTrue((project / 'docs/plan-maestro/visualizacion.html').is_file())
 

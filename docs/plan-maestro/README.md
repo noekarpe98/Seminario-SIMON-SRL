@@ -21,7 +21,7 @@ Antes de comenzar una tarea, registrar responsable, inicio y próximo paso. HECH
 | Archivo | Contenido |
 | --- | --- |
 | [00-preparacion.md](00-preparacion.md) | Requisitos recibidos; detalle de fronteras y consolidación por completar. |
-| [01-kit-arquitectura.md](01-kit-arquitectura.md) | Integración y comprobaciones del kit solicitado. |
+| [01-kit-arquitectura.md](01-kit-arquitectura.md) | KIT-001: integración inicial; KIT-002: actualización conciliada a Kit-AI 1.8.0. |
 | [02-requisitos-y-alcance.md](02-requisitos-y-alcance.md) | Fuente íntegra, actores, correspondencia de IDs, definiciones abiertas y secuencia técnica propuesta. |
 | [03-decisiones-relevamiento.md](03-decisiones-relevamiento.md) | Aclaraciones, alcance autorizado y puesta en marcha. |
 | [04-traslado-contextos-src.md](04-traslado-contextos-src.md) | REF-001: traslado a src, autoload, migración, skills y regresión. |
@@ -53,3 +53,5 @@ python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py serve
 ```
 
 El HTML exportado se abre sin red. El servidor imprime su URL y observa cambios validados, conserva la última versión válida ante errores y no escribe las especificaciones. `--port 0` elige un puerto libre. Las pruebas del producto dependen del stack y de los criterios: no se infieren del validador documental.
+
+El kit 1.8.0 incorpora consulta task y coordinación claim/release. Al ejecutar una tarea autorizada, reservarla antes de investigar; al cerrar o interrumpir, registrar estado/evidencia, validar y liberar desde el mismo worktree. Las reservas solo abarcan el mismo Git local. El lanzador python -X utf8 -B ver-plan.py abre el árbol sincronizado en un puerto libre; los comandos manuales anteriores siguen disponibles.
