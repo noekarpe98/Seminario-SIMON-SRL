@@ -252,4 +252,24 @@ class ProductionNeedsTest extends TestCase
         $this->expectException(BusinessRuleViolation::class);
         app(QueryProductionNeeds::class)->handle($this->production->id, 0);
     }
+
+    public function test_read_is_not_limited_to_recent_200_orders_and_does_not_issue_writes(): void
+    {
+        for ($index = 1; $index <= 205; $index++) {
+            $order = DB::table('business_orders')->insertGetId([
+                'registration_id' => (string) Str::uuid(), 'request_digest' => str_repeat('a', 64),
+                'number' => 'TEST-'.$index, 'customer_id' => $this->customer, 'seller_id' => $this->admin->id,
+                'origin' => 'F', 'status' => 'Confirmado', 'created_at' => now(),
+            ]);
+            DB::table('business_order_lines')->insert(['order_id' => $order, 'variant_id' => $this->variant, 'quantity' => 2, 'dispatched' => 0]);
+        }
+        $queries = [];
+        DB::listen(function ($query) use (&$queries): void {
+            $queries[] = $query->sql;
+        });
+        $this->assertSame(410, $this->row()['pending']);
+        foreach ($queries as $query) {
+            $this->assertDoesNotMatchRegularExpression('/^\s*(insert|update|delete|replace|create|drop|alter)\b/i', $query);
+        }
+    }
 }

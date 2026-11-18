@@ -104,3 +104,20 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Última actualización:** 2026-11-04
 - **Próximo paso:** usar el flujo con cuentas y datos reales configurados; conservar las pruebas y verificar auditoría externa en SEC-001
 - **Evidencia actual:** INV-001 entrega el recorrido autorizado de altas desde terminados, bajas al despachar o retirar, marca de retiro de propietarios y reducción del saldo de mercadería. Producción/stock/pedido/auditoría se confirman juntos. Verificación: 16 pruebas y 87 aserciones aprobadas, build y formato correctos, migración aplicada con copia previa. No se registran cobros ni se cancela cuenta corriente. La protección externa exigida por RNF-003 sigue explícita en SEC-001.
+
+### [HECHO] GIT-001 — Conciliar y publicar la PR independiente de RF-010
+
+- **Capa:** SOLICITADO
+- **Fuente:** solicitudes del usuario de separar RF-010, publicar su rama y PR y continuar la tarea el 2026-11-18.
+- **Contexto propietario:** Integración Git de InventarioTrazabilidad y VentasPedidos.
+- **Dependencias:** RF-010
+- **Alcance:** resolver conflictos de feature/R010 con main, conservar los contratos más recientes y publicar una PR verificable desde el fork personal.
+- **Fuera de alcance:** implementar otra RF, publicar cambios del kit o modificar permisos del repositorio original.
+- **Invariantes:** conservar la proyección, los permisos, la ausencia de escrituras y la implementación remota ya aceptada; no sobrescribir cambios locales ajenos.
+- **Contratos y archivos previstos:** contratos existentes de planificación, pruebas de necesidades, documentación y PR #2.
+- **Criterios de aceptación:** rama sin conflictos con main; regresión funcional y formato aprobados; PR publicada con evidencia actualizada y estado listo para revisión.
+- **Responsable:** codex-pr-r010-r014-01a1eb43
+- **Fecha de inicio:** 2026-11-18
+- **Última actualización:** 2026-11-18
+- **Próximo paso:** ninguno de conciliación; PR #2 lista para revisión. La fusión requiere permiso del repositorio original.
+- **Evidencia actual:** conciliación sobre b164f2f conserva los contratos de planificación, la proyección de dominio y la interfaz Livewire del remoto. Se transfiere la prueba local de 205 notas y ausencia de escrituras SQL. Regresión: 205 pruebas PHP/1987 aserciones, 5 pruebas JavaScript, build Vite, Pint y diff sin errores. La PR [#2](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/2) está publicada y lista para revisión, sin conflictos con main; conserva la historia de la rama y las mejoras remotas.
