@@ -93,3 +93,20 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Última actualización:** 2026-11-04
 - **Próximo paso:** pospuesto por el usuario; retomar al iniciar el módulo logístico específico
 - **Evidencia actual:** Trabajo registrado a partir de SRS-ACL-2026-11-04; sin implementación de este módulo todavía.
+
+### [EN_CURSO] GIT-002 — Conciliar y publicar la PR independiente de RF-014
+
+- **Capa:** SOLICITADO
+- **Fuente:** solicitudes del usuario de separar RF-014, publicar su rama y PR y continuar la tarea el 2026-11-18.
+- **Contexto propietario:** Integración Git de InventarioTrazabilidad y VentasPedidos.
+- **Dependencias:** RF-014
+- **Alcance:** resolver conflictos de feature/R014 con main y publicar la entrega parcial compatible con Livewire, autorizaciones y picking existentes.
+- **Fuera de alcance:** documentos logísticos, devoluciones, cambios del kit y modificación de permisos del repositorio original.
+- **Invariantes:** conservar stock, saldo, auditoría e idempotencia; mantener los contratos remotos y el control de pares identificados; no sobrescribir otros cambios locales.
+- **Contratos y archivos previstos:** PrepareDispatch, DispatchQueue, DispatchStock, OperationsController, vistas, pruebas y PR #3.
+- **Criterios de aceptación:** rama sin conflictos con main; pruebas de parciales, permisos, direcciones y concurrencia aprobadas junto con la regresión pertinente; PR publicada lista para revisión.
+- **Responsable:** codex-pr-r010-r014-01a1eb43
+- **Fecha de inicio:** 2026-11-18
+- **Última actualización:** 2026-11-18
+- **Próximo paso:** reservar y conciliar la rama con origin/main.
+- **Evidencia actual:** rama independiente f1561f6 publicada en el fork noekarpe98; PR #3 abierta en borrador y con conflictos. El merge requiere permiso sobre el repositorio original.
