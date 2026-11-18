@@ -111,7 +111,7 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Próximo paso:** ninguno de conciliación; PR #3 lista para revisión. La fusión requiere permiso del repositorio original.
 - **Evidencia actual:** conciliación sobre b164f2f preserva Livewire, ManagementActions, las autorizaciones paginadas, picking y los contratos de RF-010. La cola se incorpora a Despachos. 33 pruebas específicas/326 aserciones y suite completa de 215 pruebas/2108 aserciones aprobadas; 10 pruebas JavaScript, build Vite, Pint y diff sin errores. Chrome con SQLite temporal y 1000 notas verificó nota antigua, rechazo de exceso, dirección conservada, parciales 4+6, cierre por todos los artículos, historia por destino y móvil de 390 px sin desbordamiento; capturas de escritorio/móvil revisadas y limpieza completada. El ensayo se adaptó al mensaje de saldo/picking ya existente en main; no se cambió esa regla. No acredita motor/red productivos. PR [#3](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/3) publicada desde el fork y lista para revisión, sin conflictos con main.
 
-### [EN_CURSO] GIT-003 — Publicar la exclusión presupuestaria de RF-013 y LOG-001
+### [HECHO] GIT-003 — Publicar la exclusión presupuestaria de RF-013 y LOG-001
 
 - **Capa:** SOLICITADO
 - **Fuente:** solicitud del usuario del 2026-11-18 de subir el trabajo a sus ramas remotas y abrir las PR; DEC-2026-11-18-01
@@ -125,5 +125,5 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Responsable:** codex-publicacion-01a1f00b
 - **Fecha de inicio:** 2026-11-18
 - **Última actualización:** 2026-11-18
-- **Próximo paso:** reservar la tarea, revisar el diff y publicar rama y PR.
-- **Evidencia actual:** cambios locales de la exclusión preservados; RF-010 y RF-014 ya están integradas mediante las PR #2 y #3. Esta entrega no incorpora implementación logística.
+- **Próximo paso:** ninguno de publicación; PR #4 abierta para revisión. La integración en main corresponde al responsable del repositorio.
+- **Evidencia actual:** rama codex/rf-013-documentos-logistica publicada en personal, con los cuatro archivos documentales revisados. PR [#4](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/4) abierta contra main de stefanoreichert/Seminario-SIMON-SRL. Validador del plan aprobado con esquema 1 y 39 tareas; git diff --check aprobado. Se conserva la interfaz del visor y no se publica implementación logística ni cambios de dependencias. RF-010 y RF-014 ya están integradas mediante las PR #2 y #3. La integración conectada no permitió crear la PR; la API oficial con la autenticación Git de noekarpe98 confirmó su apertura.
