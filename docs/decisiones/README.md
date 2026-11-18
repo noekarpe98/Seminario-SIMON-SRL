@@ -216,3 +216,13 @@ Conciliación de RF-014 del 2026-11-18: se preservan el componente Livewire y la
 - Adaptaciones: textos LF, UTF-8 y tiempos máximos en CLI de pruebas; los casos de colisión y no UTF-8 se separan de los de enlaces simbólicos. Solo WinError 1314 provoca omisión de enlaces. La prueba de layout se adapta a ES modules para el package.json existente. La reserva exclusiva de puertos Windows ya está incluida en upstream.
 - Verificación: pruebas del kit y del visor, hashes de preservación, comparación de las 24 fuentes de skills e instalación y ZIP reproducible con manifiesto. La tarea conserva resultados y límites. El visor integrado se revisa por HTTP local de solo lectura; el protocolo file fue rechazado por el navegador, sin habilitar acceso a archivos arbitrarios.
 - No se modifican las dependencias del producto, el índice Git ni los archivos de funcionalidades. Se conserva el PDF de colaboración íntegro y su guía solo se actualiza para documentar claim/release.
+
+## DEC-2026-11-18-01 — Documentos logísticos y hojas de ruta fuera del presupuesto
+
+- Estado: decisión expresa del usuario.
+- Fecha y fuente: 2026-11-18. Tras solicitar continuar RF-013 y consultar zonas y formatos de impresión de remitos, rótulos y hojas de ruta, el usuario respondió: «Esto lo dejamos fuera del presupuesto. Ponlo así en el plan maestro».
+- Decisión: excluir RF-013 y su prerrequisito LOG-001 del presupuesto vigente. Incluye generación e impresión de remitos, rótulos y hojas de ruta, configuración de zonas y definición de formatos/plantillas.
+- Registro: ambas tareas pasan a estado y capa EXCLUIDO; se conservan IDs, requisitos históricos, dependencias y criterios. La exclusión no acredita implementación ni cumplimiento de los criterios.
+- Trabajo iniciado: LOG-001 se reservó e inició antes de recibir la exclusión. Se detuvo el desarrollo y se retiraron los cambios de implementación y pruebas preparados por este chat; se preservan sus datos de inicio y responsable y se libera la reserva. No se aplicaron migraciones ni se agregaron datos sintéticos a la base real. RF-013 no llegó a iniciarse.
+- Alternativas consideradas: continuar desarrollando las plantillas o mantener las tareas como pendientes del presupuesto. Se registra la exclusión explícita solicitada; una reactivación requiere una nueva autorización y alcance presupuestario acordados.
+- Alcance: documentos y hojas de ruta de RF-013/LOG-001. RF-014 y las demás funcionalidades y tareas conservan sus estados y evidencia. No se inicia otra tarea por esta decisión.

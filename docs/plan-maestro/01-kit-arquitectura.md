@@ -65,7 +65,7 @@
 - **Evidencia actual:** recuperación selectiva del stash 4bf0ead en un worktree desde origin/main 52030ac; el stash permanece íntegro. Se conciliaron las herramientas 1.8.0 con las acciones actuales del visor y se conservaron todas las reglas Laravel/Filament/Livewire de AGENTS.md. Los scripts y activos instalados coinciden con la copia portable; los tres SKILL.md conservan sus adaptaciones del proyecto y Windows. PDF de colaboración idéntico al guardado (SHA-256 d5ba53fb6ca133aef58d868476fc31c972e348313ef6708c8b68b26b3746d0d4). Suite Python: 92 pruebas, OK con 11 omisiones de enlaces simbólicos en Windows; Node: 11 pruebas aprobadas; sintaxis de los tres activos y git diff --check aprobados. ver-plan.py --help reconoce open/claim/release. Revisión del visor por HTTP local de solo lectura: búsqueda KIT-002, detalle y acciones, cadena de tres tareas, tema oscuro y agrupación por módulo correctos. Sin cambios en src, app, rutas, bases ni dependencias del producto. La exclusión presupuestaria está en la PR #4 y package-lock.json se publica por separado.
   - Publicación verificada el 2026-11-18: rama codex/kit-ai-1-8 subida a personal y PR [#5](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/5) abierta contra main del repositorio principal. Se conserva el stash de respaldo y no se fusiona la PR.
 
-### [EN_CURSO] GIT-006 — Conciliar e integrar la PR del kit con main
+### [PARCIAL] GIT-006 — Conciliar e integrar la PR del kit con main
 
 - **Capa:** SOLICITADO
 - **Fuente:** solicitud del usuario del 2026-11-18 de solucionar conflictos y hacer merge a main.
@@ -79,5 +79,5 @@
 - **Responsable:** codex-merge-01a1f00b
 - **Fecha de inicio:** 2026-11-18
 - **Última actualización:** 2026-11-18
-- **Próximo paso:** reservar y conciliar con main.
-- **Evidencia actual:** PR #4 integrada; PR #5 presenta conflictos con main y PR #6 permanece en borrador.
+- **Próximo paso:** publicar la conciliación y confirmar la integración de PR #5; registrar el resultado en el plan.
+- **Evidencia actual:** PR #4 integrada en 8b5ff7a. Conciliados el registro de decisiones y el visor generado, conservando KIT-002, GIT-003 y las exclusiones RF-013/LOG-001. Plan válido de 42 tareas; 11 pruebas JavaScript aprobadas; 92 pruebas Python aprobadas con 11 omisiones de enlaces simbólicos en Windows. Dos ejecuciones iniciales de la suite Python fallaron con WinError 10053 en la prueba HTTP; la prueba aislada y la suite completa posterior aprobaron sin cambios de código. La PR #6 permanece en borrador por npm ci.

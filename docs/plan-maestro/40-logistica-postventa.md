@@ -12,16 +12,16 @@ Contexto propietario: LogisticaPostventa (frontera propuesta). Los contratos del
 
 ## Reglas, decisiones pendientes y estado observado
 
-El usuario autorizó implementar baja física y reducción de pares pendientes al confirmar despacho, sin cancelar cuenta corriente monetaria. Se identifica retiro de propietarios sin deducir exención de registro/autorización. Remitos y hojas de ruta actuales son manuales; las hojas se difieren a LOG-001. Devoluciones: seis meses desde fabricación como regla operativa informada, aprobación de Claudia según permiso, reintegro a stock vendible solo si el par es apto y nota negativa sin reposición pendiente.
+El usuario autorizó implementar baja física y reducción de pares pendientes al confirmar despacho, sin cancelar cuenta corriente monetaria. Se identifica retiro de propietarios sin deducir exención de registro/autorización. Remitos y hojas de ruta actuales son manuales. El 2026-11-18 el usuario dejó fuera del presupuesto RF-013 y LOG-001: emisión e impresión de remitos, rótulos y hojas de ruta, incluidas zonas y formatos (DEC-2026-11-18-01). Devoluciones: seis meses desde fabricación como regla operativa informada, aprobación de Claudia según permiso, reintegro a stock vendible solo si el par es apto y nota negativa sin reposición pendiente.
 
 El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 incorpora las operaciones descritas en [las aclaraciones](03-decisiones-relevamiento.md); las tareas conservan el trabajo que aún falta.
 
 ## Tareas
 
-### [PENDIENTE] RF-013 — Emitir e imprimir remitos, rótulos y hojas de ruta por zona
+### [EXCLUIDO] RF-013 — Emitir e imprimir remitos, rótulos y hojas de ruta por zona
 
-- **Capa:** SOLICITADO
-- **Fuente:** SRS-2026-11-04, RF13; aclaraciones posteriores SRS-ACL-2026-11-04; DEC-2026-11-04-05
+- **Capa:** EXCLUIDO
+- **Fuente:** SRS-2026-11-04, RF13; aclaraciones posteriores SRS-ACL-2026-11-04; DEC-2026-11-04-05; exclusión presupuestaria expresa del usuario del 2026-11-18; DEC-2026-11-18-01
 - **Contexto propietario:** LogisticaPostventa (frontera propuesta)
 - **Dependencias:** RF-002, RF-014, LOG-001
 - **Alcance:** Generación automática e impresión de remitos de entrega, rótulos de identificación y hojas de ruta agrupadas por zona geográfica.
@@ -31,9 +31,9 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Criterios de aceptación:** Una entrega genera los tres tipos de documentos con datos y cantidades correctos; varias entregas producen hojas de ruta para las zonas acordadas. Se prueba impresión/reimpresión con las plantillas y dispositivos definidos, sin generar nuevos movimientos de stock.
 - **Responsable:** sin asignar
 - **Fecha de inicio:** pendiente
-- **Última actualización:** 2026-11-04
-- **Próximo paso:** retomar documentos cuando se solicite ese módulo; remitos actuales son manuales y las hojas de ruta quedan para el módulo específico LOG-001
-- **Evidencia actual:** Requisito RF13 incorporado desde la fuente conservada; sin implementación ni pruebas funcionales específicas observadas. Dependencias, contratos y casos de prueba son descomposición técnica del plan, no decisiones comerciales adicionales.
+- **Última actualización:** 2026-11-18
+- **Próximo paso:** no implementar dentro del presupuesto vigente; retomar únicamente con una nueva autorización expresa y su alcance acordado, revisando también LOG-001.
+- **Evidencia actual:** Requisito RF13 incorporado originalmente desde la fuente conservada; se mantienen ID, dependencias, alcance y criterios para trazabilidad. El 2026-11-18, ante la consulta sobre zonas y formatos para estos documentos, el usuario indicó «Esto lo dejamos fuera del presupuesto. Ponlo así en el plan maestro». DEC-2026-11-18-01 registra la exclusión de remitos, rótulos y hojas de ruta. RF-013 no se inició porque su prerrequisito LOG-001 seguía abierto; no se declara una entrega funcional.
 
 ### [HECHO] RF-014 — Confirmar despachos parciales y reducir el saldo hasta completar el pedido
 
@@ -77,10 +77,10 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Próximo paso:** implementar el módulo cuando se solicite; conservar estas definiciones sin repetir la consulta de negocio
 - **Evidencia actual:** Requisito RF15 incorporado desde la fuente conservada; sin implementación ni pruebas funcionales específicas observadas. Dependencias, contratos y casos de prueba son descomposición técnica del plan, no decisiones comerciales adicionales.
 
-### [PENDIENTE] LOG-001 — Desarrollar el módulo específico de hojas de ruta
+### [EXCLUIDO] LOG-001 — Desarrollar el módulo específico de hojas de ruta
 
-- **Capa:** SOLICITADO
-- **Fuente:** SRS-ACL-2026-11-04; DEC-2026-11-04-05
+- **Capa:** EXCLUIDO
+- **Fuente:** SRS-ACL-2026-11-04; DEC-2026-11-04-05; exclusión presupuestaria expresa del usuario del 2026-11-18; DEC-2026-11-18-01
 - **Contexto propietario:** LogisticaPostventa
 - **Dependencias:** RF-014
 - **Alcance:** Digitalizar las hojas de ruta actualmente manuales en una fase posterior; definir zonas y formatos allí.
@@ -88,11 +88,11 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Invariantes:** Conservar fuentes, permisos configurables y evidencia; no confundir saldos físicos con dinero ni borrar historia.
 - **Contratos y archivos previstos:** Contratos/casos de uso del contexto, adaptadores y pruebas pertinentes; documentación del mismo plan.
 - **Criterios de aceptación:** Agrupar las entregas correctas por las zonas definidas, conservar cantidades y destinos y generar documentos reproducibles; optimización de recorridos solo si se solicita.
-- **Responsable:** sin asignar
-- **Fecha de inicio:** pendiente
-- **Última actualización:** 2026-11-04
-- **Próximo paso:** pospuesto por el usuario; retomar al iniciar el módulo logístico específico
-- **Evidencia actual:** Trabajo registrado a partir de SRS-ACL-2026-11-04; sin implementación de este módulo todavía.
+- **Responsable:** codex-rf013-01a1f00b
+- **Fecha de inicio:** 2026-11-18
+- **Última actualización:** 2026-11-18
+- **Próximo paso:** no desarrollar el módulo dentro del presupuesto vigente; cualquier reactivación necesita una nueva autorización expresa y definición de zonas y formatos.
+- **Evidencia actual:** Trabajo registrado originalmente a partir de SRS-ACL-2026-11-04. Se reservó y comenzó el 2026-11-18 como prerrequisito de RF-013; se conservan el responsable y la fecha de inicio. El usuario lo dejó fuera del presupuesto junto con RF-013 por DEC-2026-11-18-01. Se detuvo el desarrollo y se retiraron los cambios de código, migración y pruebas preparados en este chat. Las verificaciones experimentales no acreditan una entrega ni forman parte del producto. No se aplicó ninguna migración ni se cargaron datos en la base real.
 
 ### [HECHO] GIT-002 — Conciliar y publicar la PR independiente de RF-014
 
@@ -110,3 +110,20 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Última actualización:** 2026-11-18
 - **Próximo paso:** ninguno de conciliación; PR #3 lista para revisión. La fusión requiere permiso del repositorio original.
 - **Evidencia actual:** conciliación sobre b164f2f preserva Livewire, ManagementActions, las autorizaciones paginadas, picking y los contratos de RF-010. La cola se incorpora a Despachos. 33 pruebas específicas/326 aserciones y suite completa de 215 pruebas/2108 aserciones aprobadas; 10 pruebas JavaScript, build Vite, Pint y diff sin errores. Chrome con SQLite temporal y 1000 notas verificó nota antigua, rechazo de exceso, dirección conservada, parciales 4+6, cierre por todos los artículos, historia por destino y móvil de 390 px sin desbordamiento; capturas de escritorio/móvil revisadas y limpieza completada. El ensayo se adaptó al mensaje de saldo/picking ya existente en main; no se cambió esa regla. No acredita motor/red productivos. PR [#3](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/3) publicada desde el fork y lista para revisión, sin conflictos con main.
+
+### [HECHO] GIT-003 — Publicar la exclusión presupuestaria de RF-013 y LOG-001
+
+- **Capa:** SOLICITADO
+- **Fuente:** solicitud del usuario del 2026-11-18 de subir el trabajo a sus ramas remotas y abrir las PR; DEC-2026-11-18-01
+- **Contexto propietario:** coordinación Git y documentación del plan
+- **Dependencias:** ninguna
+- **Alcance:** verificar y publicar únicamente la decisión presupuestaria y su reflejo en el plan y visor desde una rama propia hacia main.
+- **Fuera de alcance:** implementar los documentos excluidos, modificar dependencias, integrar la PR o publicar los cambios del kit en esta entrega.
+- **Invariantes:** conservar los IDs, el historial de RF-014, los cambios guardados y la interfaz existente del visor.
+- **Contratos y archivos previstos:** docs/decisiones/README.md; docs/plan-maestro/40-logistica-postventa.md, README.md y visualizacion.html; rama codex/rf-013-documentos-logistica y PR.
+- **Criterios de aceptación:** plan válido, diff exclusivamente documental, rama publicada y PR abierta contra main del repositorio principal con alcance y validación documentados.
+- **Responsable:** codex-publicacion-01a1f00b
+- **Fecha de inicio:** 2026-11-18
+- **Última actualización:** 2026-11-18
+- **Próximo paso:** ninguno de publicación; PR #4 abierta para revisión. La integración en main corresponde al responsable del repositorio.
+- **Evidencia actual:** rama codex/rf-013-documentos-logistica publicada en personal, con los cuatro archivos documentales revisados. PR [#4](https://github.com/stefanoreichert/Seminario-SIMON-SRL/pull/4) abierta contra main de stefanoreichert/Seminario-SIMON-SRL. Validador del plan aprobado con esquema 1 y 39 tareas; git diff --check aprobado. Se conserva la interfaz del visor y no se publica implementación logística ni cambios de dependencias. RF-010 y RF-014 ya están integradas mediante las PR #2 y #3. La integración conectada no permitió crear la PR; la API oficial con la autenticación Git de noekarpe98 confirmó su apertura.
