@@ -11,7 +11,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import quote, unquote, urlsplit
 
-from roadmap import render, snapshot, write_document
+from plan_model import IMAGE_TYPES
+from roadmap import open_viewer, render, snapshot, write_document
 from roadmap_edit import EditConflict, approval_token, persist, proposal
 
 
@@ -25,7 +26,8 @@ class Monitor:
 
     def fingerprint(self) -> str:
         digest = hashlib.sha256()
-        for path in sorted(self.plan_dir.rglob('*.md')):
+        suffixes = {'.md', *IMAGE_TYPES}
+        for path in sorted(path for path in self.plan_dir.rglob('*') if path.suffix.lower() in suffixes and not path.is_dir()):
             if path.is_symlink() or not path.resolve().is_relative_to(self.plan_dir.resolve()):
                 raise ValueError('El plan contiene una fuente enlazada fuera de sus archivos.')
             digest.update(path.relative_to(self.plan_dir).as_posix().encode('utf-8') + b'\0' + path.read_bytes() + b'\0')
@@ -176,7 +178,8 @@ def create_server(monitor: Monitor, port: int = 8788) -> ThreadingHTTPServer:
     return RoadmapHTTPServer(('127.0.0.1', port), Handler)
 
 
-def serve(root: Path, plan_dir: Path, output: Path, port: int, interval: float, *, allow_edit: bool = False) -> int:
+def serve(root: Path, plan_dir: Path, output: Path, port: int, interval: float, *, allow_edit: bool = False,
+          open_browser: bool = False) -> int:
     monitor = Monitor(root, plan_dir, output, allow_edit=allow_edit)
     server = create_server(monitor, port)
     if not monitor.refresh():
@@ -190,8 +193,11 @@ def serve(root: Path, plan_dir: Path, output: Path, port: int, interval: float, 
 
     worker = threading.Thread(target=watch, name='roadmap-watch', daemon=True)
     worker.start()
+    url = f'http://127.0.0.1:{server.server_port}/'
     print(f"{monitor.graph['projectName']} — proyecto {monitor.graph['projectId']}\n"
-          f'http://127.0.0.1:{server.server_port}/{output.name}\nCtrl+C para detener.', flush=True)
+          f'{url}\nCtrl+C para detener.', flush=True)
+    if open_browser:
+        threading.Thread(target=open_viewer, args=(url,), name='roadmap-browser', daemon=True).start()
     try:
         server.serve_forever(poll_interval=0.25)
     except KeyboardInterrupt:

@@ -6,8 +6,26 @@
   const scopes = {SOLICITADO: "Solicitado", PROPUESTO: "Propuesto", EXCLUIDO: "Excluido"};
   const scopeDescriptions = {SOLICITADO: "Pedido confirmado por el usuario.", PROPUESTO: "Propuesta pendiente de autorización para ejecutarse.", EXCLUIDO: "Fuera del alcance por una decisión explícita."};
   const fieldLabel = (name) => name === "Capa" ? "Alcance autorizado" : name === "Alcance" ? "Descripción y alcance" : name;
-  const colors = {PENDIENTE: "#65788c", EN_CURSO: "#245ca6", PARCIAL: "#996308", HECHO: "#18765b", BLOQUEADO: "#b13d48", EXCLUIDO: "#7a559d"};
-  const backgrounds = {PENDIENTE: "#eef1f5", EN_CURSO: "#e9f1ff", PARCIAL: "#fff3d8", HECHO: "#e5f5eb", BLOQUEADO: "#fdebed", EXCLUIDO: "#f2ebfa"};
+  const colors = Object.fromEntries(Object.keys(labels).map((status) => [status, `var(--color-${status})`]));
+  const backgrounds = Object.fromEntries(Object.keys(labels).map((status) => [status, `var(--background-${status})`]));
+  const systemTheme = matchMedia("(prefers-color-scheme: dark)");
+  let themePreference = null;
+  try {
+    const saved = localStorage.getItem("roadmap-theme");
+    if (saved === "light" || saved === "dark") themePreference = saved;
+  } catch {} // El visor también funciona si el navegador bloquea el almacenamiento.
+  function applyTheme() {
+    const dark = themePreference ? themePreference === "dark" : systemTheme.matches;
+    document.documentElement.dataset.theme = dark ? "dark" : "light";
+    $("theme-toggle").setAttribute("aria-pressed", String(dark));
+  }
+  $("theme-toggle").addEventListener("click", () => {
+    themePreference = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    try {localStorage.setItem("roadmap-theme", themePreference);} catch {}
+    applyTheme();
+  });
+  systemTheme.addEventListener?.("change", () => {if (!themePreference) applyTheme();});
+  applyTheme();
   function colorize(node, status) {
     node.style.setProperty("--status", colors[status]);
     node.style.setProperty("--status-bg", backgrounds[status]);
@@ -18,8 +36,13 @@
   const states = new Set(data.states);
   const normalize = (value) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const viewport = $("viewport");
-  let selected = null, chain = null, visible = [], positions = new Map();
-  let scale = 1, pan = {x: 0, y: 0}, bounds = {width: 1, height: 1}, drag = null;
+  let selected = null, selectedModule = null, chain = null, visible = [], positions = new Map(), imageIndex = 0, stepImage = () => {};
+  let entering = new Set(), changed = new Set(), detailTask = null, nodeClickTimer = null;
+  const motionClasses = (node, id) => {node.classList.toggle("enter", entering.has(id)); node.classList.toggle("changed", changed.has(id));};
+  const slide = (node, delta) => {
+    if (typeof node.animate === "function" && matchMedia("(prefers-reduced-motion: no-preference)").matches) node.animate([{opacity: 0, transform: `translateX(${delta * 12}px)`}, {opacity: 1, transform: "none"}], {duration: 200, easing: "cubic-bezier(.2,0,0,1)"});
+  };
+  let scale = 1, pan = {x: 0, y: 0}, bounds = {width: 1, height: 1}, drag = null, moduleAnchors = new Map();
   const element = (tag, text, className) => {
     const node = document.createElement(tag);
     if (text !== undefined) node.textContent = text;
@@ -210,48 +233,68 @@
     button.addEventListener("click", () => {states.has(status) ? states.delete(status) : states.add(status); chain = null; render();});
     $("states").append(button);
   });
-  data.modules.forEach((module) => {const option = element("option", module.title); option.value = module.id; $("module").append(option);});
-  function transform() {
+  data.states.forEach((status) => {const option = element("option", labels[status]); option.value = status; $("list-status").append(option);});
+  data.modules.forEach((module) => {const option = element("option", module.title); option.value = module.id; $("module").append(option); const nav = element("option", module.title); nav.value = module.id; $("module-nav").append(nav);});
+  function transform(animated = false) {
+    $("scene").classList.toggle("glide", animated);
     $("scene").style.transform = `translate(${pan.x}px, ${pan.y}px) scale(${scale})`;
     $("zoom-label").textContent = `${Math.round(scale * 100)}%`;
   }
-  function fit() {
+  function fit(animated = false) {
     if (!visible.length) return;
     scale = Math.min(1, Math.max(.04, Math.min((viewport.clientWidth - 50) / bounds.width, (viewport.clientHeight - 50) / bounds.height)));
     pan = {x: (viewport.clientWidth - bounds.width * scale) / 2, y: (viewport.clientHeight - bounds.height * scale) / 2};
-    transform();
+    transform(animated);
   }
   function readableFrame() {
     fit();
     if (scale < .65) {
       scale = .65;
-      pan = {x: 24, y: (viewport.clientHeight - bounds.height * scale) / 2};
+      pan = {x: 24, y: $("graph-layout").value === "modules" ? 24 : (viewport.clientHeight - bounds.height * scale) / 2};
       transform();
     }
   }
-  function zoom(factor, x = viewport.clientWidth / 2, y = viewport.clientHeight / 2) {
+  function zoom(factor, x, y) {
+    // Con coordenadas viene de la rueda, que debe seguir al gesto sin retraso.
+    const animated = x === undefined;
+    if (animated) {x = viewport.clientWidth / 2; y = viewport.clientHeight / 2;}
     const previous = scale;
     scale = Math.min(2, Math.max(.04, scale * factor));
     pan = {x: x - (x - pan.x) * scale / previous, y: y - (y - pan.y) * scale / previous};
-    transform();
+    transform(animated);
   }
-  function center(id) {
+  function center(id, animated = false) {
     const position = positions.get(id);
     if (!position) return;
     scale = Math.max(.85, scale);
     pan = {x: viewport.clientWidth / 2 - (position.x + 98) * scale, y: viewport.clientHeight / 2 - (position.y + 53) * scale};
-    transform();
+    transform(animated);
+  }
+  function focusModule(id, animated = false) {
+    const anchor = moduleAnchors.get(id);
+    if (anchor === undefined) return;
+    scale = Math.max(.65, scale);
+    pan = {x: 24 - 24 * scale, y: 24 - anchor * scale};
+    transform(animated);
   }
   function resetFilters() {
-    $("search").value = ""; $("module").value = ""; $("scope").value = "";
+    clearTimeout(nodeClickTimer); nodeClickTimer = null;
+    $("search").value = ""; $("module").value = ""; $("scope").value = ""; $("list-status").value = "";
     data.states.forEach((status) => states.add(status));
-    chain = null;
+    chain = null; selectedModule = null; $("module-nav").value = "";
   }
   function select(id, fromList = false, fromRelation = false) {
-    selected = id;
+    clearTimeout(nodeClickTimer); nodeClickTimer = null;
+    selected = id; selectedModule = null; $("module-nav").value = ""; imageIndex = 0;
     if (fromRelation) {resetFilters(); render(false);}
     else {paintSelection(); renderDetail();}
-    if (fromList || fromRelation) center(id);
+    if (fromList || fromRelation) center(id, true);
+  }
+  function toggleChain(id) {
+    clearTimeout(nodeClickTimer); nodeClickTimer = null;
+    selected = id; selectedModule = null; $("module-nav").value = ""; imageIndex = 0;
+    chain = chain === id ? null : id;
+    render();
   }
   function paintSelection() {
     const related = selected ? chainIds(selected) : new Set();
@@ -260,39 +303,71 @@
       node.setAttribute("aria-pressed", String(node.dataset.task === selected));
       if (node.classList.contains("node")) node.classList.toggle("related", related.has(node.dataset.task));
     });
+    document.querySelectorAll(".module-label").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.module === selectedModule)));
     document.querySelectorAll(".edge").forEach((edge) => edge.classList.toggle("related", related.has(edge.dataset.from) && related.has(edge.dataset.to)));
+    updateCrossLinks();
+  }
+  function updateCrossLinks() {
+    const grouped = $("graph-layout").value === "modules", mode = $("cross-links").value;
+    let shown = 0, hiddenCross = 0;
+    document.querySelectorAll(".edge").forEach((edge) => {
+      const from = tasks.get(edge.dataset.from), to = tasks.get(edge.dataset.to);
+      const show = !grouped || RoadmapLayout.edgeVisible(mode, from, to, selected, selectedModule);
+      edge.style.display = show ? "" : "none";
+      if (show) shown++; else hiddenCross++;
+      edge.classList.toggle("cross-edge", grouped && from.module !== to.module);
+    });
+    const hiddenByFilter = Number($("graph-count").dataset.hidden || 0);
+    $("graph-count").textContent = `${visible.length} tareas · ${shown} conexiones${hiddenByFilter ? ` · ${hiddenByFilter} fuera del filtro` : ""}${hiddenCross ? ` · ${hiddenCross} entre módulos ocultas` : ""}${chain ? ` · Cadena de ${chain}` : ""}`;
   }
   function drawGraph() {
     positions = new Map();
     $("nodes").replaceChildren(); $("connections").replaceChildren();
-    const levels = [...new Set(visible.map((task) => fullLevels.get(task.id)))].sort((a, b) => a - b);
-    const columns = levels.map((value) => visible.filter((task) => fullLevels.get(task.id) === value));
-    const rows = Math.max(1, ...columns.map((column) => column.length));
-    columns.forEach((column, columnIndex) => {
-      const averageParent = (task) => {
-        const ys = task.dependencies.filter((id) => positions.has(id)).map((id) => positions.get(id).y);
-        return ys.length ? ys.reduce((sum, y) => sum + y, 0) / ys.length : 0;
-      };
-      column.sort((a, b) => averageParent(a) - averageParent(b) || a.id.localeCompare(b.id));
-      const heading = element("span", `Nivel ${levels[columnIndex] + 1}`, "level-label");
+    const mode = $("graph-layout").value;
+    const layout = RoadmapLayout.layout(visible, fullLevels, mode, data.modules);
+    positions = layout.positions; bounds = layout.bounds;
+    moduleAnchors = new Map(mode === "modules" ? layout.labels.map((label) => [label.id, label.y]) : []);
+    layout.levels.forEach((value, columnIndex) => {
+      const heading = element("span", `Nivel ${value + 1}`, "level-label");
       heading.style.left = `${columnIndex * 270 + 24}px`; heading.style.top = "10px";
       $("nodes").append(heading);
-      column.forEach((task, row) => {
-        const position = {x: columnIndex * 270 + 24, y: 44 + row * 134 + (rows - column.length) * 67};
-        positions.set(task.id, position);
-        const button = element("button", undefined, "node");
-        button.dataset.task = task.id;
-        button.style.left = `${position.x}px`; button.style.top = `${position.y}px`;
-        colorize(button, task.status);
-        button.setAttribute("aria-label", `${task.id}, ${task.title}, ${labels[task.status]}`);
-        button.title = `${task.id} · ${task.title} · ${labels[task.status]}`;
-        button.append(element("span", task.id, "node-id"), element("span", task.title, "node-title"), element("span", `${labels[task.status]} · ${scopes[task.scope]}`, "node-status"));
-        button.addEventListener("click", () => select(task.id));
-        button.addEventListener("focus", () => {if (document.activeElement.matches(":focus-visible")) center(task.id);});
-        $("nodes").append(button);
-      });
     });
-    bounds = {width: Math.max(240, levels.length * 270 - 26), height: rows * 134 + 50};
+    layout.labels.forEach((group) => {
+      const heading = element(mode === "modules" ? "button" : "span", mode === "modules" ? group.title : `Árbol · ${group.id}`, mode === "modules" ? "module-label" : "tree-label");
+      heading.style.left = "24px"; heading.style.top = `${group.y}px`;
+      if (mode === "modules") {
+        heading.type = "button"; heading.dataset.module = group.id;
+        heading.setAttribute("aria-label", `Mostrar conexiones del módulo ${group.title}`);
+        heading.setAttribute("aria-pressed", String(selectedModule === group.id));
+        heading.addEventListener("click", () => {
+          clearTimeout(nodeClickTimer); nodeClickTimer = null;
+          selected = null; selectedModule = selectedModule === group.id ? null : group.id;
+          $("module-nav").value = selectedModule || "";
+          paintSelection(); renderDetail();
+        });
+      }
+      $("nodes").append(heading);
+    });
+    visible.forEach((task) => {
+      const position = positions.get(task.id), button = element("button", undefined, "node");
+      button.dataset.task = task.id;
+      button.style.left = `${position.x}px`; button.style.top = `${position.y}px`;
+      colorize(button, task.status);
+      button.setAttribute("aria-label", `${task.id}, ${task.title}, ${labels[task.status]}`);
+      button.title = `${task.id} · ${task.title} · ${labels[task.status]} · Doble clic para mostrar su cadena`;
+      button.append(element("span", task.id, "node-id"), element("span", task.title, "node-title"), element("span", `${labels[task.status]} · ${scopes[task.scope]}`, "node-status"));
+      motionClasses(button, task.id);
+      // Abrir el detalle cambia el ancho del gráfico; esperar el doble clic evita
+      // que el nodo se mueva bajo el puntero entre los dos clics.
+      button.addEventListener("click", (event) => {
+        clearTimeout(nodeClickTimer);
+        if (event.detail === 0) select(task.id); // Activación con teclado.
+        else if (event.detail === 1) nodeClickTimer = setTimeout(() => select(task.id), 500);
+      });
+      button.addEventListener("dblclick", () => toggleChain(task.id));
+      button.addEventListener("focus", () => {if (document.activeElement.matches(":focus-visible")) center(task.id);});
+      $("nodes").append(button);
+    });
     const svg = $("connections"), ns = "http://www.w3.org/2000/svg";
     svg.setAttribute("width", bounds.width); svg.setAttribute("height", bounds.height);
     const defs = document.createElementNS(ns, "defs");
@@ -302,7 +377,7 @@
       const arrow = document.createElementNS(ns, "path"); arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z"); arrow.setAttribute("fill", colors[status]); marker.append(arrow); defs.append(marker);
     });
     svg.append(defs);
-    let drawn = 0, hidden = 0;
+    let hidden = 0;
     data.edges.forEach((edge) => {
       const from = positions.get(edge.from), to = positions.get(edge.to);
       if (!from || !to) {if (from || to) hidden++; return;}
@@ -314,23 +389,60 @@
       colorize(path, status);
       path.setAttribute("class", "edge"); path.setAttribute("marker-end", `url(#arrow-${status})`);
       path.dataset.from = edge.from; path.dataset.to = edge.to;
-      svg.append(path); drawn++;
+      svg.append(path);
     });
-    $("graph-count").textContent = `${visible.length} tareas · ${drawn} conexiones${hidden ? ` · ${hidden} fuera del filtro` : ""}${chain ? ` · Cadena de ${chain}` : ""}`;
+    $("graph-count").dataset.hidden = String(hidden);
     $("empty").hidden = visible.length > 0;
   }
   function relationSection(title, ids) {
     const section = element("section"); section.append(element("h3", `${title} (${ids.length})`));
     const list = element("div", undefined, "relation-list");
     ids.forEach((id) => {
-      const button = element("button", id); button.title = `${tasks.get(id).title} · ${labels[tasks.get(id).status]}`;
+      const task = tasks.get(id), button = element("button", id);
+      colorize(button, task.status);
+      button.title = `${task.title} · ${labels[task.status]}`;
+      button.setAttribute("aria-label", `${id}, ${task.title}, ${labels[task.status]}`);
       button.addEventListener("click", () => select(id, false, true)); list.append(button);
     });
     if (!ids.length) list.append(element("p", "Sin tareas con ID explícito."));
     section.append(list); return section;
   }
+  function imageGallery(images) {
+    imageIndex = Math.min(imageIndex, images.length - 1);
+    const gallery = element("div"), button = element("button", undefined, "evidence-image"), thumbnail = element("img"), caption = element("span"), counter = element("output");
+    thumbnail.alt = "";
+    button.append(thumbnail, caption);
+    button.addEventListener("click", () => $("image-viewer").showModal());
+    // Actualiza en el lugar: renderDetail perdería el foco y el scroll del panel.
+    const show = () => {
+      const image = images[imageIndex];
+      button.setAttribute("aria-label", `Ampliar imagen: ${image.alt}`);
+      thumbnail.src = image.src; caption.textContent = image.alt;
+      counter.textContent = $("image-count").textContent = `${imageIndex + 1} / ${images.length}`;
+      $("image-title").textContent = image.alt;
+      $("image-full").src = image.src; $("image-full").alt = image.alt;
+      $("image-full").parentElement.scrollTop = 0;
+    };
+    stepImage = (delta) => {imageIndex = (imageIndex + delta + images.length) % images.length; show(); slide(thumbnail, delta); slide($("image-full"), delta);};
+    const stepper = (text, label, delta) => {
+      const step = element("button", text);
+      step.setAttribute("aria-label", label);
+      step.addEventListener("click", () => stepImage(delta));
+      return step;
+    };
+    show();
+    $("image-nav").hidden = images.length < 2;
+    gallery.append(button);
+    if (images.length > 1) {
+      const nav = element("div", undefined, "evidence-nav");
+      nav.append(stepper("‹", "Imagen anterior", -1), counter, stepper("›", "Imagen siguiente", 1));
+      gallery.append(nav);
+    }
+    return gallery;
+  }
   function renderDetail() {
     document.querySelector(".workspace").classList.toggle("has-detail", Boolean(selected));
+    const newTask = selected !== detailTask; detailTask = selected;
     if (!selected) {
       $("detail").replaceChildren();
       const placeholder = element("div", undefined, "detail-placeholder");
@@ -338,6 +450,7 @@
       $("detail").append(placeholder); return;
     }
     const task = tasks.get(selected), header = element("div", undefined, "detail-header"), body = element("div", undefined, "detail-body");
+    body.classList.toggle("enter", newTask);
     const close = element("button", "Cerrar"); close.setAttribute("aria-label", "Cerrar detalle de tarea"); close.addEventListener("click", closeDetail);
     header.append(element("strong", task.id), close);
     const badge = element("span", undefined, "badge"); colorize(badge, task.status); badge.append(dot(task.status), element("span", `${labels[task.status]} · ${scopes[task.scope]}`));
@@ -345,11 +458,12 @@
     const module = data.modules.find((item) => item.id === task.module); body.append(element("p", module.title));
     if (chain || !visible.some((item) => item.id === task.id)) body.append(element("p", chain ? `Cadena completa de ${chain}; los filtros quedan suspendidos hasta salir.` : "Esta tarea quedó fuera de los filtros actuales."));
     const actions = element("div", undefined, "detail-actions"), branch = element("button", chain ? "Salir de la cadena" : "Ver cadena completa");
-    branch.addEventListener("click", () => {chain = chain ? null : task.id; render();}); actions.append(branch);
+    branch.addEventListener("click", () => {if (chain) {chain = null; render();} else toggleChain(task.id);}); actions.append(branch);
     const edit = element("button", "Editar tarea"), instruct = element("button", "Dar instrucción a Codex"), copy = element("button", "Copiar contexto");
     edit.addEventListener("click", () => openEditor(task.id)); instruct.addEventListener("click", () => openInstruction(task.id));
     copy.addEventListener("click", () => copyText(promptFor(task.id)));
     actions.append(edit, instruct, copy, codexLink(task.id)); body.append(actions);
+    if (task.images?.length) body.append(element("h3", "Evidencia visual"), imageGallery(task.images));
     body.append(relationSection("Requisitos", task.dependencies), relationSection("Dependientes", dependents.get(task.id)));
     for (const label of data.fieldNames) {
       body.append(element("h3", label === "Dependencias" ? "Dependencias: texto del plan" : fieldLabel(label)), element("p", task.fields[label]));
@@ -366,24 +480,46 @@
     (listButton || $("search")).focus({preventScroll: true});
   }
   function render(reframe = true) {
+    clearTimeout(nodeClickTimer); nodeClickTimer = null;
     const query = normalize($("search").value.trim()), module = $("module").value, scope = $("scope").value;
     const branch = chain ? chainIds(chain) : null;
+    // render reconstruye los nodos: solo se anima lo que recién aparece, no todo en cada filtro o actualización.
+    const previous = new Set(visible.map((task) => task.id));
     visible = data.tasks.filter((task) => branch ? branch.has(task.id) : states.has(task.status) && (!module || task.module === module) && (!scope || task.scope === scope) && (!query || normalize(`${task.id} ${task.title}`).includes(query)));
+    const visibleModules = new Set(visible.map((task) => task.module));
+    for (const option of $("module-nav").options) if (option.value) option.disabled = !visibleModules.has(option.value);
+    if (selectedModule && !visibleModules.has(selectedModule)) {selectedModule = null; $("module-nav").value = "";}
+    entering = new Set(visible.filter((task) => !previous.has(task.id)).map((task) => task.id));
     document.querySelectorAll("[data-status]").forEach((button) => button.setAttribute("aria-pressed", String(states.has(button.dataset.status))));
-    $("result-count").textContent = `${visible.length} / ${data.tasks.length}`;
+    const listStatus = $("list-status").value;
+    const listTasks = visible.filter((task) => !listStatus || task.status === listStatus);
+    $("result-count").textContent = `${listTasks.length} / ${data.tasks.length}`;
     $("task-list").replaceChildren();
-    visible.forEach((task) => {
-      const button = element("button", undefined, "list-task"); button.dataset.task = task.id; colorize(button, task.status);
+    listTasks.forEach((task) => {
+      const button = element("button", undefined, "list-task"); button.dataset.task = task.id; colorize(button, task.status); motionClasses(button, task.id);
       const meta = element("span", undefined, "list-meta"); meta.append(dot(task.status), element("span", task.id), element("span", labels[task.status], "list-status"));
       button.append(meta, element("span", task.title, "list-title")); button.addEventListener("click", () => select(task.id, true)); $("task-list").append(button);
     });
-    if (!visible.length) $("task-list").append(element("p", "No hay coincidencias. Restablecé los filtros para volver al plan completo.", "no-results"));
+    if (!listTasks.length) $("task-list").append(element("p", "No hay coincidencias. Cambiá el estado de la lista o restablecé los filtros.", "no-results"));
     drawGraph(); paintSelection(); renderDetail(); if (reframe) readableFrame();
   }
   $("filters").addEventListener("submit", (event) => event.preventDefault());
   for (const id of ["search", "module", "scope"]) $(id).addEventListener(id === "search" ? "input" : "change", () => {chain = null; render();});
+  $("list-status").addEventListener("change", () => render(false));
+  $("graph-layout").addEventListener("change", () => {
+    selectedModule = null; $("module-nav").value = "";
+    const grouped = $("graph-layout").value === "modules";
+    $("cross-control").hidden = !grouped; $("module-nav-wrap").hidden = !grouped;
+    render();
+  });
+  $("module-nav").addEventListener("change", () => {
+    selected = null; selectedModule = $("module-nav").value || null;
+    paintSelection(); renderDetail();
+    if (selectedModule) focusModule(selectedModule, true);
+  });
+  $("cross-links").addEventListener("change", updateCrossLinks);
   $("reset").addEventListener("click", () => {resetFilters(); selected = null; render(); $("search").focus();});
-  $("zoom-in").addEventListener("click", () => zoom(1.3)); $("zoom-out").addEventListener("click", () => zoom(1 / 1.3)); $("fit").addEventListener("click", fit);
+  $("zoom-in").addEventListener("click", () => zoom(1.3)); $("zoom-out").addEventListener("click", () => zoom(1 / 1.3)); $("fit").addEventListener("click", () => fit(true));
   viewport.addEventListener("pointerdown", (event) => {
     if (event.target.closest("button") || event.button !== 0) return;
     drag = {id: event.pointerId, x: event.clientX, y: event.clientY, pan: {...pan}};
@@ -402,14 +538,20 @@
     const deltas = {ArrowLeft: [60, 0], ArrowRight: [-60, 0], ArrowUp: [0, 60], ArrowDown: [0, -60]};
     if (deltas[event.key]) {event.preventDefault(); pan.x += deltas[event.key][0]; pan.y += deltas[event.key][1]; transform();}
     if (["+", "=", "-"].includes(event.key)) {event.preventDefault(); zoom(event.key === "-" ? 1 / 1.3 : 1.3);}
-    if (event.key === "Home") {event.preventDefault(); fit();}
+    if (event.key === "Home") {event.preventDefault(); fit(true);}
   });
   $("help-open").addEventListener("click", () => $("help").showModal());
   const closeHelp = () => {$("help").close(); $("help-open").focus();};
   $("help-close").addEventListener("click", closeHelp); $("help-done").addEventListener("click", closeHelp);
   $("help").addEventListener("cancel", (event) => {event.preventDefault(); closeHelp();});
-  document.addEventListener("keydown", (event) => {if (event.key === "Escape" && !$("help").open && !$("task-action").open && selected) {event.preventDefault(); closeDetail();}});
-  new ResizeObserver(() => selected && positions.has(selected) ? center(selected) : readableFrame()).observe(viewport);
+  $("image-close").addEventListener("click", () => $("image-viewer").close());
+  $("image-prev").addEventListener("click", () => stepImage(-1)); $("image-next").addEventListener("click", () => stepImage(1));
+  $("image-viewer").addEventListener("keydown", (event) => {
+    const delta = {ArrowLeft: -1, ArrowRight: 1}[event.key];
+    if (delta && !$("image-nav").hidden) {event.preventDefault(); stepImage(delta);}
+  });
+  document.addEventListener("keydown", (event) => {if (event.key === "Escape" && !document.querySelector("dialog[open]") && selected) {event.preventDefault(); closeDetail();}});
+  new ResizeObserver(() => selectedModule && moduleAnchors.has(selectedModule) ? focusModule(selectedModule) : selected && positions.has(selected) ? center(selected) : readableFrame()).observe(viewport);
   render();
 
   function liveStatus(mode, text, error = "") {
@@ -425,7 +567,9 @@
     const focused = document.activeElement;
     const focusedTask = focused?.dataset.task;
     const focusedClass = focused?.classList.contains("list-task") ? ".list-task" : ".node";
+    const previousStatus = new Map(data.tasks.map((task) => [task.id, task.status]));
     data = next;
+    changed = new Set(data.tasks.filter((task) => previousStatus.has(task.id) && previousStatus.get(task.id) !== task.status).map((task) => task.id));
     document.title = `Árbol de tareas · ${data.projectName}`;
     $("project-name").textContent = data.projectName;
     tasks.clear(); dependents.clear(); fullLevels.clear();
@@ -434,17 +578,23 @@
     data.tasks.forEach((task) => level(task.id));
     if (selected && !tasks.has(selected)) selected = null;
     if (chain && !tasks.has(chain)) chain = null;
+    if (selectedModule && !data.modules.some((module) => module.id === selectedModule)) selectedModule = null;
     const currentModule = $("module").value;
     $("module").replaceChildren(element("option", "Todos los módulos"));
     $("module").firstChild.value = "";
     data.modules.forEach((module) => {const option = element("option", module.title); option.value = module.id; $("module").append(option);});
     $("module").value = data.modules.some((module) => module.id === currentModule) ? currentModule : "";
+    $("module-nav").replaceChildren(element("option", "Elegí un módulo"));
+    $("module-nav").firstChild.value = "";
+    data.modules.forEach((module) => {const option = element("option", module.title); option.value = module.id; $("module-nav").append(option);});
+    $("module-nav").value = selectedModule || "";
     document.querySelectorAll(".state-card").forEach((button) => {
       const count = data.tasks.filter((task) => task.status === button.dataset.status).length;
       button.querySelector(".count").textContent = count;
       button.setAttribute("aria-label", `${labels[button.dataset.status]}: ${count} tareas`);
     });
     render(false);
+    changed = new Set();
     $("detail").scrollTop = previous.detailScroll;
     if (focusedTask) {
       const replacement = [...document.querySelectorAll(focusedClass)].find((node) => node.dataset.task === focusedTask);

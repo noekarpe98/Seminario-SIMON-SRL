@@ -24,16 +24,39 @@ composer run dev
 php artisan test
 ```
 
+## Trabajo en equipo
+
+Consultar la [guía de colaboración con Git y GitHub](docs/trabajo-en-equipo.md): acceso, ramas por tarea, commits, Pull Requests, revisión, conflictos y traspaso de trabajo con evidencia en el plan maestro.
+
+Se conserva el [manual PDF original](docs/fuentes/Manual_Git_GitHub_Trabajo_en_Equipo.pdf) aportado por el usuario. La guía adapta sus ejemplos al proyecto; incorporarla no ejecuta publicaciones ni modifica los permisos del repositorio.
+
 ## Kit de arquitectura y plan maestro
 
-Preparación basada en [wj-004/Promt-AI actualizado](https://github.com/wj-004/Promt-AI/tree/04f621f12421e819bfeb1cc1518c4e864617d14e), adaptada a este repositorio y Windows. Requiere Python 3.9 o posterior y su biblioteca estándar; no agrega dependencias de la aplicación.
+Kit actualizado a **1.8.0** desde [wj-004/Kit-AI, commit cd0fe95e6c5a6b592b7176d7f9c7cf1e492917b2](https://github.com/wj-004/Kit-AI/tree/cd0fe95e6c5a6b592b7176d7f9c7cf1e492917b2), conciliado con este repositorio y Windows el 2026-11-17. Requiere Python 3.9 o posterior y su biblioteca estándar; no agrega dependencias de la aplicación. La historia de versiones y adaptaciones se conserva en .agents/project-kit.json y KIT-002.
 
 - [Prompt maestro reutilizable](resources/kit-inicio-proyecto/PROMPT_MAESTRO.md) y [guía del kit](resources/kit-inicio-proyecto/README.md).
 - [Ficha del proyecto](docs/proyecto.md), [arquitectura](docs/arquitectura/README.md) y [decisiones](docs/decisiones/README.md).
 - [Plan maestro](docs/plan-maestro/README.md) y [visor HTML sin conexión](docs/plan-maestro/visualizacion.html).
 - Skills locales: [arquitectura](.agents/skills/arquitectura-hexagonal-ddd/SKILL.md), [planificación](.agents/skills/plan-maestro-desarrollo-sistema/SKILL.md) y [visor/validador](.agents/skills/manage-project-roadmap/SKILL.md).
 
-Desde la raíz del proyecto:
+Para abrir el árbol sincronizado con puerto automático:
+
+```sh
+python -X utf8 -B ver-plan.py
+```
+
+Con `--static` genera y abre una copia sin servidor. El visor incorpora tema oscuro, detalle y contexto de tareas, árboles separados y agrupación por módulo. La edición persistente es opcional: requiere `--allow-edit`, rama distinta de main/master y revisión/autorización de cada guardado; está deshabilitada por defecto.
+
+Consulta y coordinación de una tarea autorizada (sustituir ID y usar un responsable único por chat):
+
+```sh
+python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py task ID --format context
+python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py claim ID --owner "identificador único del chat"
+```
+
+Al finalizar o interrumpir, actualizar estado, evidencia y próximo paso, validar y ejecutar `release ID --owner "el mismo identificador"`. Las reservas coordinan worktrees del mismo repositorio local; no sustituyen la coordinación entre clones o máquinas. Las consultas de solo lectura no reservan. Ver [trabajo en equipo](docs/trabajo-en-equipo.md).
+
+Comandos manuales desde la raíz del proyecto:
 
 ```sh
 python -X utf8 -B .agents/skills/manage-project-roadmap/scripts/roadmap.py check
@@ -51,6 +74,9 @@ python -X utf8 -B resources/kit-inicio-proyecto/scripts/init_project.py --target
 python -X utf8 -B resources/kit-inicio-proyecto/scripts/package_kit.py --output storage/app/kit-inicio-proyecto.zip
 python -X utf8 -B -m unittest discover -s resources/kit-inicio-proyecto/tests -v
 node --check resources/kit-inicio-proyecto/skills/manage-project-roadmap/assets/roadmap-tree.js
+node --check resources/kit-inicio-proyecto/skills/manage-project-roadmap/assets/roadmap-layout.js
+node --check resources/kit-inicio-proyecto/skills/manage-project-roadmap/assets/roadmap-context.js
+node --test resources/kit-inicio-proyecto/tests/roadmap-context.test.js resources/kit-inicio-proyecto/tests/roadmap-layout.test.js
 ```
 
 Repetir el primer comando sin `--dry-run` para instalar en el destino revisado. El ZIP incluye un manifiesto SHA-256 y puede adjuntarse junto al prompt. El perfil `base` mantiene el stack por definir; también existen perfiles Laravel, Flutter y Go.
