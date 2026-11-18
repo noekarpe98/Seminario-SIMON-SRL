@@ -7,8 +7,11 @@
 @if($dispatchReport !== null)
     @include('inventario::dispatch-pagination')
 @endif
+@if($productionNeeds !== null || $planningUnavailable)
+    @include('inventario::production-needs')
+@endif
 @if($pendingProduction !== null)
-    @include('ventas::pending-summary', ['pendingReport' => $pendingProduction, 'withCustomers' => false, 'pendingPageRoute' => 'operations.production.index', 'pendingPageParams' => ['article_page' => $pendingProduction['articles']['page']]])
+    @include('ventas::pending-summary', ['pendingReport' => $pendingProduction, 'withCustomers' => false, 'pendingPageRoute' => 'operations.production.index', 'pendingPageParams' => ['article_page' => $pendingProduction['articles']['page'], 'needs_page' => $productionNeeds['page'] ?? null]])
 @endif
 @if($section === 'orders')
 <x-filament::section heading="Notas de pedido" class="simon-section">

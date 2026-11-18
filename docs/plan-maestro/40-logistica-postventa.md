@@ -108,5 +108,5 @@ El estado inicial era un esqueleto sin procesos comerciales. El corte INV-001 in
 - **Responsable:** codex-pr-r010-r014-01a1eb43
 - **Fecha de inicio:** 2026-11-18
 - **Última actualización:** 2026-11-18
-- **Próximo paso:** reservar y conciliar la rama con origin/main.
-- **Evidencia actual:** rama independiente f1561f6 publicada en el fork noekarpe98; PR #3 abierta en borrador y con conflictos. El merge requiere permiso sobre el repositorio original.
+- **Próximo paso:** publicar la conciliación y marcar la PR #3 lista para revisión; el merge requiere permiso sobre el original.
+- **Evidencia actual:** conciliación sobre b164f2f preserva Livewire, ManagementActions, las autorizaciones paginadas, picking y los contratos de RF-010. La cola se incorpora a Despachos. 33 pruebas específicas/326 aserciones y suite completa de 215 pruebas/2108 aserciones aprobadas; 10 pruebas JavaScript, build Vite, Pint y diff sin errores. Chrome con SQLite temporal y 1000 notas verificó nota antigua, rechazo de exceso, dirección conservada, parciales 4+6, cierre por todos los artículos, historia por destino y móvil de 390 px sin desbordamiento; capturas de escritorio/móvil revisadas y limpieza completada. El ensayo se adaptó al mensaje de saldo/picking ya existente en main; no se cambió esa regla. No acredita motor/red productivos. PR #3 publicada desde el fork personal, pendiente de esta actualización.

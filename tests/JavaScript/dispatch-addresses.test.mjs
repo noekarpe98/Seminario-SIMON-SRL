@@ -9,7 +9,7 @@ const settle = () => new Promise((resolve) => setImmediate(resolve));
 function harness(savedAddress = '') {
     const events = new Map();
     const requests = [];
-    const source = { selectedOptions: [{ dataset: { addressUrl: '/direcciones/1', destinationLabel: 'Destino del pedido' } }], addEventListener: (name, callback) => events.set(`source:${name}`, callback) };
+    const source = { selectedOptions: [{ dataset: { addressUrl: '/admin/clientes/1/direcciones/opciones', destinationLabel: 'Destino del pedido' } }], addEventListener: (name, callback) => events.set(`source:${name}`, callback) };
     const destinations = {
         dataset: { selectedAddress: savedAddress }, value: '', options: [], validity: '',
         replaceChildren(option) { this.options = [option]; this.value = option.value; },
@@ -26,11 +26,12 @@ function harness(savedAddress = '') {
         constructor(text, value, defaultSelected = false, selected = false) { Object.assign(this, { text, value, defaultSelected, selected }); }
     }
     vm.runInNewContext(script, {
-        document: { querySelectorAll: () => [form] }, AbortController, Option,
-        fetch: (url, options) => new Promise((resolve, reject) => requests.push({ url, options, resolve, reject })),
+        document: { querySelectorAll: () => [form], addEventListener: (name, callback) => events.set(`document:${name}`, callback), querySelector: () => ({ getAttribute: () => 'management' }) },
+        window: { Livewire: { find: () => ({ addresses: (customerId) => new Promise((resolve, reject) => requests.push({ customerId, resolve, reject })) }) } },
+        location: { href: 'https://simon.test/admin/despachos' }, URL, AbortController, Option,
     });
     const respond = async (index, addresses) => {
-        requests[index].resolve({ ok: true, redirected: false, json: async () => addresses });
+        requests[index].resolve(addresses);
         await settle();
     };
     return { events, requests, source, destinations, status, form, respond };
@@ -76,9 +77,9 @@ test('an unavailable address service does not discard a saved destination', asyn
 
 test('late responses cannot replace the addresses of a different selected customer', async () => {
     const state = harness();
-    state.source.selectedOptions = [{ dataset: { addressUrl: '/direcciones/2', destinationLabel: 'Otro destino' } }];
+    state.source.selectedOptions = [{ dataset: { addressUrl: '/admin/clientes/2/direcciones/opciones', destinationLabel: 'Otro destino' } }];
     const next = state.events.get('source:change')();
-    assert.equal(state.requests[0].options.signal.aborted, true);
+    assert.equal(state.requests[1].customerId, 2);
     await state.respond(1, [{ id: 9, label: 'Cliente dos', street: 'Calle 9', locality: 'Posadas', province: 'Misiones' }]);
     await next;
     await state.respond(0, [{ id: 7, label: 'Cliente uno' }]);

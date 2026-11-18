@@ -31,6 +31,6 @@
         <label>Pares que salen<x-simon::input name="quantity" type="number" required min="1" max="1000000" :value="old('quantity')" /></label>
         <label><x-simon::input type="checkbox" name="owner_withdrawal" value="1" :checked="(bool) old('owner_withdrawal', false)" /> Retiro de propietarios</label>
         <p>Requiere validación administrativa. El despacho no registra cobros ni cancela deuda monetaria.</p>
-        <x-filament::button type="submit">Confirmar salida y actualizar pares pendientes</x-filament::button>
+        <x-filament::button type="submit" icon="heroicon-o-truck">Confirmar salida y actualizar pares pendientes</x-filament::button>
     </form>
 </x-filament::section>

@@ -14,8 +14,10 @@ use Simon\ClientesAdministracion\Infrastructure\SqlCustomers;
 use Simon\InventarioTrazabilidad\Application\MoveStock;
 use Simon\InventarioTrazabilidad\Application\PrepareDispatch;
 use Simon\InventarioTrazabilidad\Application\PrepareInventory;
+use Simon\InventarioTrazabilidad\Application\QueryProductionNeeds;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlInventory;
 use Simon\Shared\Application\AccessPolicy;
+use Simon\Shared\Application\ReadSourceUnavailable;
 use Simon\Shared\UI\HandlesOperations;
 use Simon\VentasPedidos\Application\ListOrders;
 use Simon\VentasPedidos\Application\PendingDemand;
@@ -28,7 +30,7 @@ final class OperationsController extends Controller
 {
     use HandlesOperations;
 
-    public function index(Request $request, AccessPolicy $access, SqlInventory $inventory, SqlCustomers $customers, ListOrders $sales, OrderFormData $orderForms, PendingDemand $demand, PrepareDispatch $dispatch): View
+    public function index(Request $request, AccessPolicy $access, SqlInventory $inventory, SqlCustomers $customers, ListOrders $sales, OrderFormData $orderForms, PendingDemand $demand, QueryProductionNeeds $needs, PrepareDispatch $dispatch): View
     {
         $permissions = [];
 
@@ -58,7 +60,7 @@ final class OperationsController extends Controller
         }
 
         $mayReadOrders = array_any(['orders.manage', 'orders.create', 'inventory.view', 'inventory.dispatch', 'dispatch.authorize'], fn (string $permission): bool => $permissions[$permission]);
-        $isDispatchQueue = in_array($section, ['dispatch', 'authorization'], true);
+        $isDispatchQueue = $section === 'dispatch';
         $orderData = $mayReadOrders && ! $isDispatchQueue ? $sales->handle($request->user()->id, $originFilter) : ['orders' => [], 'lines' => []];
         $overview = $isDispatchQueue ? ['variants' => [], 'production' => [], 'stock' => []] : $inventory->overview($withStock);
         $dispatchReport = null;
@@ -76,10 +78,20 @@ final class OperationsController extends Controller
         }
         $operationId = (string) Str::uuid();
         $pendingProduction = null;
+        $productionNeeds = null;
+        $planningUnavailable = false;
 
         if ($section === 'production' && ($permissions['production.manage'] || $permissions['inventory.view'])) {
-            $pages = $request->validate(['article_page' => ['nullable', 'integer', 'min:1']]);
-            $pendingProduction = $demand->forProduction($request->user()->id, (int) ($pages['article_page'] ?? 1));
+            $pages = $request->validate(['article_page' => ['nullable', 'integer', 'min:1'], 'needs_page' => ['nullable', 'integer', 'min:1']]);
+
+            try {
+                $productionNeeds = $needs->handle($request->user()->id, (int) ($pages['needs_page'] ?? 1));
+                $pendingProduction = $demand->forProduction($request->user()->id, (int) ($pages['article_page'] ?? 1));
+            } catch (ReadSourceUnavailable $exception) {
+                report($exception);
+                $planningUnavailable = true;
+                $productionNeeds = null;
+            }
         }
 
         return view($request->routeIs('operations.snapshot') ? 'inventario::balances' : 'inventario::index', [
@@ -87,13 +99,14 @@ final class OperationsController extends Controller
             'originFilter' => $originFilter, 'originLabels' => OrderOrigin::labels(),
             'showStock' => $withStock && in_array($section, ['overview', 'stock', 'dispatch'], true),
             'showProduction' => $withStock && in_array($section, ['overview', 'production', 'stock'], true),
-            'showOrders' => in_array($section, ['overview', 'orders', 'dispatch', 'authorization'], true),
+            'showOrders' => in_array($section, ['overview', 'orders', 'dispatch'], true),
             'withStock' => $withStock,
             ...$overview, 'permissions' => $permissions, 'customers' => $isDispatchQueue ? [] : $customers->customers($permissions['clients.manage']),
             ...$orderData,
             'audits' => $permissions['audit.view'] ? $inventory->recentAudit() : [],
             'operationId' => $operationId,
             'pendingProduction' => $pendingProduction,
+            'productionNeeds' => $productionNeeds, 'planningUnavailable' => $planningUnavailable,
             'dispatchReport' => $dispatchReport, 'dispatchFilters' => $dispatchFilters,
             'orderForm' => $section === 'orders' && ($permissions['orders.create'] || $permissions['orders.manage']) ? $orderForms->make($request, $operationId) : null,
         ]);
@@ -134,7 +147,7 @@ final class OperationsController extends Controller
     {
         $data = $request->validate(['order_id' => ['required', 'integer', 'exists:business_orders,id'], 'conditions' => ['required', 'string', 'max:10000'], 'billing' => ['boolean'], 'credit' => ['boolean']]);
 
-        return $this->perform(fn () => $customers->authorize($request->user()->id, (int) $data['order_id'], $request->boolean('billing'), $request->boolean('credit'), $data['conditions']), 'Validación administrativa guardada.');
+        return $this->perform(fn () => $customers->authorize($request->user()->id, (int) $data['order_id'], $request->boolean('billing'), $request->boolean('credit'), $data['conditions']), 'Validación administrativa guardada.', route('operations.authorization', ['pedido' => $data['order_id']]));
     }
 
     public function production(Request $request, PrepareInventory $inventory): RedirectResponse
