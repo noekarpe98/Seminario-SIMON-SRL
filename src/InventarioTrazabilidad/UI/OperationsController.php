@@ -12,6 +12,7 @@ use Simon\Acceso\Domain\Permissions;
 use Simon\ClientesAdministracion\Application\ManageCustomers;
 use Simon\ClientesAdministracion\Infrastructure\SqlCustomers;
 use Simon\InventarioTrazabilidad\Application\MoveStock;
+use Simon\InventarioTrazabilidad\Application\PrepareDispatch;
 use Simon\InventarioTrazabilidad\Application\PrepareInventory;
 use Simon\InventarioTrazabilidad\Application\QueryProductionNeeds;
 use Simon\InventarioTrazabilidad\Infrastructure\SqlInventory;
@@ -29,7 +30,7 @@ final class OperationsController extends Controller
 {
     use HandlesOperations;
 
-    public function index(Request $request, AccessPolicy $access, SqlInventory $inventory, SqlCustomers $customers, ListOrders $sales, OrderFormData $orderForms, PendingDemand $demand, QueryProductionNeeds $needs): View
+    public function index(Request $request, AccessPolicy $access, SqlInventory $inventory, SqlCustomers $customers, ListOrders $sales, OrderFormData $orderForms, PendingDemand $demand, QueryProductionNeeds $needs, PrepareDispatch $dispatch): View
     {
         $permissions = [];
 
@@ -59,8 +60,22 @@ final class OperationsController extends Controller
         }
 
         $mayReadOrders = array_any(['orders.manage', 'orders.create', 'inventory.view', 'inventory.dispatch', 'dispatch.authorize'], fn (string $permission): bool => $permissions[$permission]);
-        $orderData = $mayReadOrders ? $sales->handle($request->user()->id, $originFilter) : ['orders' => [], 'lines' => []];
-        $overview = $inventory->overview($withStock);
+        $isDispatchQueue = $section === 'dispatch';
+        $orderData = $mayReadOrders && ! $isDispatchQueue ? $sales->handle($request->user()->id, $originFilter) : ['orders' => [], 'lines' => []];
+        $overview = $isDispatchQueue ? ['variants' => [], 'production' => [], 'stock' => []] : $inventory->overview($withStock);
+        $dispatchReport = null;
+        $dispatchFilters = [];
+        if ($isDispatchQueue) {
+            $dispatchFilters = $request->validate([
+                'order_number' => ['nullable', 'string', 'max:100'], 'lot' => ['nullable', 'string', 'max:100'],
+                'dispatch_page' => ['nullable', 'integer', 'min:1'], 'stock_page' => ['nullable', 'integer', 'min:1'],
+            ]);
+            $dispatchReport = $dispatch->handle($request->user()->id, $dispatchFilters['order_number'] ?? '', (int) ($dispatchFilters['dispatch_page'] ?? 1), $dispatchFilters['lot'] ?? '', (int) ($dispatchFilters['stock_page'] ?? 1));
+            $orderData = ['orders' => $dispatchReport['orders'], 'lines' => $dispatchReport['lines']];
+            $overview['variants'] = $dispatchReport['variants'];
+            $overview['stock'] = $section === 'dispatch' ? $dispatchReport['stockPage']['items'] : [];
+            $dispatchFilters = [...$dispatchFilters, 'dispatch_page' => $dispatchReport['page'], 'stock_page' => $dispatchReport['stockPage']['page']];
+        }
         $operationId = (string) Str::uuid();
         $pendingProduction = null;
         $productionNeeds = null;
@@ -86,12 +101,13 @@ final class OperationsController extends Controller
             'showProduction' => $withStock && in_array($section, ['overview', 'production', 'stock'], true),
             'showOrders' => in_array($section, ['overview', 'orders', 'dispatch'], true),
             'withStock' => $withStock,
-            ...$overview, 'permissions' => $permissions, 'customers' => $customers->customers($permissions['clients.manage']),
+            ...$overview, 'permissions' => $permissions, 'customers' => $isDispatchQueue ? [] : $customers->customers($permissions['clients.manage']),
             ...$orderData,
             'audits' => $permissions['audit.view'] ? $inventory->recentAudit() : [],
             'operationId' => $operationId,
             'pendingProduction' => $pendingProduction,
             'productionNeeds' => $productionNeeds, 'planningUnavailable' => $planningUnavailable,
+            'dispatchReport' => $dispatchReport, 'dispatchFilters' => $dispatchFilters,
             'orderForm' => $section === 'orders' && ($permissions['orders.create'] || $permissions['orders.manage']) ? $orderForms->make($request, $operationId) : null,
         ]);
     }
