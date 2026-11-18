@@ -31,7 +31,7 @@ try {
         'finance' => app(ManageCurrentAccounts::class)->post($request['actor_id'], $request['token'], $request['customer_id'], 'payment', $request['amount'], 'Cobro concurrente de prueba'),
         'pick' => app(ManagePicking::class)->scan($request['actor_id'], $request['token'], $request['line_id'], $request['code']),
         'register' => app(RegisterOrder::class)->handle($request['actor_id'], $request['token'], $request['customer_id'], 'F', $request['lines']),
-        'dispatch' => app(MoveStock::class)->dispatch($request['actor_id'], $request['token'], $request['line_id'], $request['batch_id'], 4, true),
+        'dispatch' => app(MoveStock::class)->dispatch($request['actor_id'], $request['token'], $request['line_id'], $request['batch_id'], $request['quantity'] ?? 4, true),
         'cancel' => app(ManageOrders::class)->transition($request['actor_id'], $request['token'], $request['order_id'], 0, 'cancel', 'Cancelación concurrente'),
     };
     echo json_encode(['accepted' => true, 'id' => $id], JSON_THROW_ON_ERROR);
