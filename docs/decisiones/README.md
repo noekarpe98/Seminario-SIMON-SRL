@@ -205,3 +205,13 @@ Para decisiones posteriores usar [la plantilla](../plantillas/decision.md), cons
 - Límites: concurrencia comprobada con procesos PHP independientes y SQLite temporal. Chrome verifica el recorrido y el documento móvil; no se declara aceptación industrial ni comportamiento de MySQL/red productivos. SEC-001/RNF-003, RF-003, remitos, hojas de ruta y devoluciones mantienen sus estados.
 
 Conciliación de RF-014 del 2026-11-18: se preservan el componente Livewire y la consulta paginada de Autorizaciones ya publicados; la cola de PrepareDispatch se integra en Despachos. Se conservan ManagementActions, LiveBalances, picking, los contratos de RF-010 y las verificaciones del motor existente. GIT-002 registra la publicación y verificación de la PR #3.
+
+## DEC-2026-11-18-01 — Documentos logísticos y hojas de ruta fuera del presupuesto
+
+- Estado: decisión expresa del usuario.
+- Fecha y fuente: 2026-11-18. Tras solicitar continuar RF-013 y consultar zonas y formatos de impresión de remitos, rótulos y hojas de ruta, el usuario respondió: «Esto lo dejamos fuera del presupuesto. Ponlo así en el plan maestro».
+- Decisión: excluir RF-013 y su prerrequisito LOG-001 del presupuesto vigente. Incluye generación e impresión de remitos, rótulos y hojas de ruta, configuración de zonas y definición de formatos/plantillas.
+- Registro: ambas tareas pasan a estado y capa EXCLUIDO; se conservan IDs, requisitos históricos, dependencias y criterios. La exclusión no acredita implementación ni cumplimiento de los criterios.
+- Trabajo iniciado: LOG-001 se reservó e inició antes de recibir la exclusión. Se detuvo el desarrollo y se retiraron los cambios de implementación y pruebas preparados por este chat; se preservan sus datos de inicio y responsable y se libera la reserva. No se aplicaron migraciones ni se agregaron datos sintéticos a la base real. RF-013 no llegó a iniciarse.
+- Alternativas consideradas: continuar desarrollando las plantillas o mantener las tareas como pendientes del presupuesto. Se registra la exclusión explícita solicitada; una reactivación requiere una nueva autorización y alcance presupuestario acordados.
+- Alcance: documentos y hojas de ruta de RF-013/LOG-001. RF-014 y las demás funcionalidades y tareas conservan sus estados y evidencia. No se inicia otra tarea por esta decisión.
